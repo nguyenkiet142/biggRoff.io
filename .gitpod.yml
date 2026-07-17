@@ -1,0 +1,59 @@
+tasks:
+  - name: HTTP Server
+    before: |
+      npm i -g http-server
+    command:
+      cd Client/public &&
+
+      http-server -c=-1 --cors
+
+  - name: Client Build
+    init: |
+      git clone https://github.com/emscripten-core/emsdk &&
+      emsdk/emsdk install latest &&
+      emsdk/emsdk activate latest &&
+      mkdir Client/build &&
+      cd Client/build &&
+      cmake -DWASM_BUILD=1 .. &&
+      cd ../..
+    command: |
+      . emsdk/emsdk_env.sh &&
+      cd Client/build &&
+      make -j && cp rrolf-client* ../public
+
+  - name: Master Server
+    init: |
+      cd MasterServer &&
+      npm i &&
+      cd ..
+    command: |
+      cd MasterServer &&
+      node main.js
+
+  - name: Game Server
+    before: |
+      sudo apt update
+      sudo apt install -y libwebsockets-dev libclang-rt-19-dev
+    init: |
+      mkdir Server/build &&
+      cd Server/build &&
+      cmake .. &&
+      cd ../..
+    command: |
+      cd Server/build &&
+      make -j && until ./rrolf-server; do sleep 1; done
+
+ports:
+  - port: 8080
+    name: HTTP Server
+    onOpen: ignore
+    visibility: public
+
+  - port: 55554
+    name: Master Server
+    onOpen: ignore
+
+  - port: 1234
+    name: Game Server
+    onOpen: ignore
+    visibility: public

@@ -1,0 +1,2 @@
+0 0 * * * root certbot renew && nginx -s reload
+0 * * * * root bash /root/rysteria/backup.sh

@@ -1,0 +1,39 @@
+{
+    "configurations": [
+        {
+            "name": "Linux-Server",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}"
+            ],
+            "defines": [
+                "_DEBUG",
+                "RR_SERVER=1",
+                "_USE_MATH_DEFINES",
+                "M_PI=3.14159265358979323846"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64"
+        },
+        {
+            "name": "Linux-Client",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}"
+            ],
+            "defines": [
+                "_DEBUG",
+                "RR_CLIENT",
+                "_USE_MATH_DEFINES",
+                "M_PI=3.14159265358979323846"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
