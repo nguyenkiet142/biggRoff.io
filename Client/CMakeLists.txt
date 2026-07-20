@@ -79,8 +79,10 @@ set(SRCS
     Ui/InGame/Chat.c
     Ui/InGame/Deathscreen.c
     Ui/InGame/Loadout.c
+    Ui/InGame/LoadoutDrag.c
     Ui/InGame/Minimap.c
     Ui/InGame/PetalsCollected.c
+    Ui/InGame/SpongeDisplay.c
     Ui/InGame/Squad.c
     Ui/ScrollContainer.c
     Ui/TitleScreen/Account.c

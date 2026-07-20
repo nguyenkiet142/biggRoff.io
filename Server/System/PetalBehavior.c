@@ -278,6 +278,27 @@ static void system_flower_petal_movement_logic(
             }
             break;
         }
+        case rr_petal_id_missle:
+        {
+            if ((player_info->input & 1) == 0)
+                break;
+            system_petal_detach(simulation, petal, player_info, outer_pos,
+                                inner_pos, petal_data);
+            petal->effect_delay = 75;
+            physical->friction = 0.5;
+            physical->bearing_angle = curr_angle;
+            EntityIdx target = rr_simulation_find_nearest_enemy(
+                simulation, id, 2190, NULL, is_close_enough_and_angle);
+            if (target != RR_NULL_ENTITY)
+            {
+                struct rr_component_physical *t_physical =
+                    rr_simulation_get_physical(simulation, target);
+                struct rr_vector delta = {t_physical->x - physical->x,
+                                          t_physical->y - physical->y};
+                physical->bearing_angle = rr_vector_theta(&delta);
+            }
+            break;
+        }
         case rr_petal_id_peas:
         {
             if ((player_info->input & 1) == 0)
@@ -608,7 +629,10 @@ static void system_flower_petal_movement_logic(
     float accel_scale = petal->id == rr_petal_id_moon ? 0.15f : 0.5f;
     physical->acceleration.x += accel_scale * chase_vector.x;
     physical->acceleration.y += accel_scale * chase_vector.y;
-    if (petal->id == rr_petal_id_fireball &&
+    if (petal->id == rr_petal_id_missle)
+        rr_component_physical_set_angle(
+            physical, curr_angle - 1.009204f);
+    else if (petal->id == rr_petal_id_fireball &&
         rr_vector_magnitude_cmp(&physical->acceleration, 1.0f) == 1)
         rr_component_physical_set_angle(
             physical, rr_vector_theta(&physical->acceleration));
@@ -636,6 +660,8 @@ static void petal_modifiers(struct rr_simulation *simulation,
     player_info->modifiers.reload_speed = 1;
     float base_max_health = health->max_health - player_info->modifiers.max_health_bonus;
     player_info->modifiers.max_health_bonus = 0;
+    player_info->modifiers.staff_damage_mult = 1;
+    player_info->modifiers.staff_speed_mult = 1;
 
     physical->aggro_range_multiplier = 1;
     health->damage_reduction = 0;
@@ -646,10 +672,24 @@ static void petal_modifiers(struct rr_simulation *simulation,
     float magnet_diminish_factor = 1;
     float third_eye_diminish_factor = 1;
     float crest_diminish_factor = 1;
+    float staff_diminish_factor = 1;
     float to_rotate = 0.1;
     float fov_bonus = 0;
     uint8_t crest_count = 0;
     uint8_t third_eye_count = 0;
+    uint8_t sponge_found = 0;
+    uint16_t max_sponge_ticks = 0;
+    uint8_t max_sponge_rarity = 0;
+    uint64_t active_sponge_slot_idx = 0;
+    for (uint64_t scan = 0; scan < player_info->slot_count; ++scan)
+        if (player_info->slots[scan].id == rr_petal_id_sponge &&
+            player_info->slots[scan].rarity > max_sponge_rarity)
+        {
+            max_sponge_rarity = player_info->slots[scan].rarity;
+            active_sponge_slot_idx = scan;
+        }
+    health->cotton_hash = RR_NULL_ENTITY;
+    health->cotton_active = 0;
     for (uint64_t outer = 0; outer < player_info->slot_count; ++outer)
     {
         struct rr_component_player_info_petal_slot *slot =
@@ -658,6 +698,12 @@ static void petal_modifiers(struct rr_simulation *simulation,
         if (data->id == rr_petal_id_leaf)
         {
             float heal = 0.075 * RR_PETAL_RARITY_SCALE[slot->rarity].heal;
+            if (health->sponge_damage_pool > 0)
+            {
+                float reduce = heal < health->sponge_damage_pool ? heal : health->sponge_damage_pool;
+                health->sponge_damage_pool -= reduce;
+                heal -= reduce;
+            }
             float max_heal = health->max_health - health->health;
             rr_component_health_set_health(health, health->health + heal);
             if (max_heal < heal)
@@ -706,6 +752,43 @@ static void petal_modifiers(struct rr_simulation *simulation,
         {
             player_info->modifiers.max_health_bonus += 10000.0f * (slot->rarity + 1);
         }
+        else if (data->id == rr_petal_id_sponge)
+        {
+            if (outer == active_sponge_slot_idx)
+            {
+                static const uint16_t sponge_pt[] = {0, 150, 225, 300, 375, 450, 525, 600, 675, 750, 900};
+                max_sponge_ticks = slot->rarity < rr_rarity_id_max ? sponge_pt[slot->rarity] : 900;
+                sponge_found = 1;
+            }
+        }
+        else if (data->id == rr_petal_id_cotton)
+        {
+            health->cotton_active = 1;
+            for (uint32_t inner = 0; inner < slot->count; ++inner)
+                if (slot->petals[inner].entity_hash != RR_NULL_ENTITY)
+                {
+                    health->cotton_hash = slot->petals[inner].entity_hash;
+                    health->cotton_has_spawned = 1;
+                    break;
+                }
+            if (health->cotton_hash == RR_NULL_ENTITY && 
+                health->cotton_absorb_pool <= 0 &&
+                !health->cotton_has_spawned)
+            {
+                float scale = RR_PETAL_RARITY_SCALE[slot->rarity].heal;
+                health->cotton_absorb_pool = data->health * scale;
+            }
+        }
+        else if (data->id == rr_petal_id_staff)
+        {
+            float raw_speed = 0.05f + 0.03f * slot->rarity;
+            float raw_dmg = 0.05f + 0.045f * slot->rarity;
+            float speed_buff = (raw_speed > 0.35f ? 0.35f : raw_speed) * staff_diminish_factor;
+            float dmg_buff = (raw_dmg > 0.50f ? 0.50f : raw_dmg) * staff_diminish_factor;
+            player_info->modifiers.staff_speed_mult += speed_buff;
+            player_info->modifiers.staff_damage_mult += dmg_buff;
+            staff_diminish_factor *= 0.5f;
+        }
         else
         {
             for (uint32_t inner = 0; inner < slot->count; ++inner)
@@ -722,14 +805,42 @@ static void petal_modifiers(struct rr_simulation *simulation,
             }
         }
     }
+    if (sponge_found)
+    {
+        uint8_t sponge_entity_alive = 0;
+        for (uint64_t scan = 0; scan < player_info->slot_count && !sponge_entity_alive; ++scan)
+            if (player_info->slots[scan].id == rr_petal_id_sponge)
+                for (uint32_t inner = 0; inner < player_info->slots[scan].count; ++inner)
+                    if (player_info->slots[scan].petals[inner].entity_hash != RR_NULL_ENTITY &&
+                        rr_simulation_entity_alive(simulation, player_info->slots[scan].petals[inner].entity_hash))
+                        { sponge_entity_alive = 1; break; }
+        if (sponge_entity_alive)
+        {
+            health->sponge_remaining_ticks = max_sponge_ticks;
+            if (health->sponge_damage_pool > 1000000.0f)
+                health->sponge_damage_pool = 1000000.0f;
+        }
+        else
+        {
+            if (health->sponge_damage_pool > 0)
+                rr_component_health_do_damage(simulation, health,
+                    player_info->flower_id, health->sponge_damage_pool,
+                    rr_animation_color_type_damage);
+            health->sponge_damage_pool = 0;
+            health->sponge_remaining_ticks = 0;
+        }
+    }
+    else if (health->sponge_damage_pool > 0)
+    {
+        rr_component_health_do_damage(simulation, health, player_info->flower_id, health->sponge_damage_pool, rr_animation_color_type_damage);
+        health->sponge_damage_pool = 0;
+        health->sponge_remaining_ticks = 0;
+    }
     float new_max = base_max_health + player_info->modifiers.max_health_bonus;
     float old_max = health->max_health;
     rr_component_health_set_max_health(health, new_max);
-    if (new_max > old_max)
-        rr_component_health_set_health(health,
-            health->health + (new_max - old_max));
-    else if (health->health > health->max_health)
-        rr_component_health_set_health(health, health->max_health);
+    if (health->health > new_max)
+        rr_component_health_set_health(health, new_max);
     rr_component_flower_set_crest_count(flower, crest_count);
     rr_component_flower_set_third_eye_count(flower, third_eye_count);
     player_info->global_rotation +=
@@ -810,6 +921,18 @@ system_egg_hatching_logic(struct rr_simulation *simulation,
     }
     rr_component_mob_set_player_spawned(
         rr_simulation_get_mob(simulation, mob_id), 1);
+
+    if (player_info->modifiers.staff_damage_mult > 1)
+    {
+        struct rr_component_health *mob_health =
+            rr_simulation_get_health(simulation, mob_id);
+        struct rr_component_physical *mob_physical =
+            rr_simulation_get_physical(simulation, mob_id);
+        float base_damage = RR_MOB_DATA[m_id].damage *
+                            RR_MOB_RARITY_SCALING[m_rar].damage;
+        mob_health->damage = base_damage * player_info->modifiers.staff_damage_mult;
+        mob_physical->acceleration_scale = player_info->modifiers.staff_speed_mult;
+    }
 
     if (petal_id == rr_petal_id_stick)
     {
@@ -963,6 +1086,28 @@ static void rr_system_petal_reload_foreach_function(EntityIdx id,
         uint8_t clump_count = data->clump_radius == 0 ? 1 : slot->count;
         for (uint64_t inner = 0; inner < slot->count; ++inner)
         {
+            if (slot->id == rr_petal_id_sponge)
+            {
+                uint8_t is_highest = 1;
+                for (uint64_t r = 0; r < player_info->slot_count; ++r)
+                    if (r != outer && player_info->slots[r].id == rr_petal_id_sponge &&
+                        (player_info->slots[r].rarity > slot->rarity ||
+                         (player_info->slots[r].rarity == slot->rarity && r < outer)))
+                        { is_highest = 0; break; }
+                if (!is_highest)
+                {
+                    if (slot->petals[inner].entity_hash != RR_NULL_ENTITY)
+                    {
+                        if (rr_simulation_entity_alive(
+                                simulation, slot->petals[inner].entity_hash))
+                            rr_simulation_request_entity_deletion(
+                                simulation, slot->petals[inner].entity_hash);
+                        slot->petals[inner].entity_hash = RR_NULL_ENTITY;
+                    }
+                    slot->petals[inner].cooldown_ticks = data->cooldown;
+                    continue;
+                }
+            }
             if (inner == 0 || data->clump_radius == 0)
                 ++rotation_pos; // clump rotpos ++
             struct rr_component_player_info_petal *p_petal =
@@ -1061,8 +1206,37 @@ static void rr_system_petal_reload_foreach_function(EntityIdx id,
         }
         if (slot->id == rr_petal_id_bubble)
             has_bubble = 1;
+        if (slot->id == rr_petal_id_sponge)
+        {
+            uint8_t is_highest = 1;
+            for (uint64_t r = 0; r < player_info->slot_count; ++r)
+                if (r != outer && player_info->slots[r].id == rr_petal_id_sponge &&
+                    (player_info->slots[r].rarity > slot->rarity ||
+                     (player_info->slots[r].rarity == slot->rarity && r < outer)))
+                    { is_highest = 0; break; }
+            if (is_highest)
+            {
+                struct rr_component_health *fh = rr_simulation_get_health(
+                    simulation, player_info->flower_id);
+                rr_component_player_info_set_slot_hp(
+                    player_info, outer,
+                    (uint8_t)fmin(255, sqrtf(fh->sponge_damage_pool / 100)));
+            }
+            else
+                rr_component_player_info_set_slot_hp(player_info, outer, 0);
+        }
+        else
+            rr_component_player_info_set_slot_hp(player_info, outer, min_hp);
         rr_component_player_info_set_slot_cd(player_info, outer, max_cd);
-        rr_component_player_info_set_slot_hp(player_info, outer, min_hp);
+    }
+    if (player_info->flower_id != RR_NULL_ENTITY)
+    {
+        struct rr_component_health *h = rr_simulation_get_health(simulation, player_info->flower_id);
+        if (!h->cotton_active)
+        {
+            h->cotton_absorb_pool = 0;
+            h->cotton_has_spawned = 0;
+        }
     }
     player_info->rotation_count = rotation_pos;
 }
@@ -1098,6 +1272,13 @@ static void system_petal_misc_logic(EntityIdx id, void *_simulation)
         {
             rr_component_physical_set_angle(
                 physical, physical->angle + 0.12f * (float)petal->spin_ccw);
+            rr_vector_from_polar(&physical->acceleration, 15.0f,
+                                 physical->bearing_angle);
+        }
+        else if (petal->id == rr_petal_id_missle)
+        {
+            rr_component_physical_set_angle(
+                physical, physical->bearing_angle - 1.009204f);
             rr_vector_from_polar(&physical->acceleration, 15.0f,
                                  physical->bearing_angle);
         }
@@ -1188,6 +1369,42 @@ static void system_petal_misc_logic(EntityIdx id, void *_simulation)
     }
 }
 
+static void system_staff_apply(EntityIdx id, void *_simulation)
+{
+    struct rr_simulation *simulation = _simulation;
+    if (!rr_simulation_has_mob(simulation, id))
+        return;
+    struct rr_component_mob *mob = rr_simulation_get_mob(simulation, id);
+    if (!mob->player_spawned)
+        return;
+    struct rr_component_relations *relations =
+        rr_simulation_get_relations(simulation, id);
+    struct rr_component_ai *ai = rr_simulation_get_ai(simulation, id);
+    struct rr_component_health *health =
+        rr_simulation_get_health(simulation, id);
+    struct rr_component_physical *physical =
+        rr_simulation_get_physical(simulation, id);
+    if (!rr_simulation_has_player_info(simulation,
+                                       (EntityIdx)relations->root_owner))
+    {
+        float base = RR_MOB_DATA[mob->id].damage *
+                     RR_MOB_RARITY_SCALING[mob->rarity].damage;
+        health->damage = base;
+        physical->acceleration_scale = 1;
+        return;
+    }
+    struct rr_component_player_info *player_info =
+        rr_simulation_get_player_info(simulation, relations->root_owner);
+    float staff_damage_mult = player_info->modifiers.staff_damage_mult;
+    float staff_speed_mult = player_info->modifiers.staff_speed_mult;
+    float base_damage = RR_MOB_DATA[mob->id].damage *
+                        RR_MOB_RARITY_SCALING[mob->rarity].damage;
+    health->damage = base_damage * staff_damage_mult;
+    physical->acceleration_scale = staff_speed_mult;
+    if (player_info->input & 2 && staff_damage_mult > 1)
+        ai->ai_state = rr_ai_state_returning_to_owner;
+}
+
 static void system_nest_logic(EntityIdx id, void *_simulation)
 {
     struct rr_simulation *simulation = _simulation;
@@ -1217,6 +1434,8 @@ void rr_system_petal_behavior_tick(struct rr_simulation *simulation)
 {
     rr_simulation_for_each_player_info(simulation, simulation,
                                        rr_system_petal_reload_foreach_function);
+    rr_simulation_for_each_ai(simulation, simulation,
+                              system_staff_apply);
     rr_simulation_for_each_petal(simulation, simulation,
                                  system_petal_misc_logic);
     rr_simulation_for_each_nest(simulation, simulation,

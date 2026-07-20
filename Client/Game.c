@@ -773,6 +773,16 @@ void rr_game_init(struct rr_game *this)
         rr_ui_anti_afk_container_init(this)
     );
 
+    rr_ui_container_add_element(
+        this->window,
+        rr_ui_sponge_display_init()
+    );
+
+    rr_ui_container_add_element(
+        this->window,
+        rr_ui_drag_ghost_init()
+    );
+
     // clang-format on
 
     for (uint32_t i = 0; i < RR_SQUAD_MEMBER_COUNT; ++i)
@@ -1516,6 +1526,44 @@ void rr_write_dev_cheat_packets(struct rr_game *this, uint8_t force)
     }
 }
 
+void rr_game_send_petal_swap_slots(struct rr_game *this,
+                                    uint8_t inventory_a, uint8_t slot_a,
+                                    uint8_t inventory_b, uint8_t slot_b)
+{
+    struct proto_bug encoder;
+    proto_bug_init(&encoder, RR_OUTGOING_PACKET);
+    proto_bug_write_uint8(&encoder, this->socket.quick_verification, "qv");
+    proto_bug_write_uint8(&encoder, rr_serverbound_petal_swap_slots, "header");
+    proto_bug_write_uint8(&encoder, inventory_a, "inv_a");
+    proto_bug_write_uint8(&encoder, slot_a, "slot_a");
+    proto_bug_write_uint8(&encoder, inventory_b, "inv_b");
+    proto_bug_write_uint8(&encoder, slot_b, "slot_b");
+    rr_websocket_send(&this->socket, encoder.current - encoder.start);
+}
+
+void rr_game_send_equip_petal(struct rr_game *this,
+                               uint8_t slot, uint8_t id, uint8_t rarity)
+{
+    struct proto_bug encoder;
+    proto_bug_init(&encoder, RR_OUTGOING_PACKET);
+    proto_bug_write_uint8(&encoder, this->socket.quick_verification, "qv");
+    proto_bug_write_uint8(&encoder, rr_serverbound_equip_petal, "header");
+    proto_bug_write_uint8(&encoder, slot, "slot");
+    proto_bug_write_uint8(&encoder, id, "id");
+    proto_bug_write_uint8(&encoder, rarity, "rarity");
+    rr_websocket_send(&this->socket, encoder.current - encoder.start);
+}
+
+void rr_game_send_unequip_petal(struct rr_game *this, uint8_t slot)
+{
+    struct proto_bug encoder;
+    proto_bug_init(&encoder, RR_OUTGOING_PACKET);
+    proto_bug_write_uint8(&encoder, this->socket.quick_verification, "qv");
+    proto_bug_write_uint8(&encoder, rr_serverbound_unequip_petal, "header");
+    proto_bug_write_uint8(&encoder, slot, "slot");
+    rr_websocket_send(&this->socket, encoder.current - encoder.start);
+}
+
 void rr_game_tick(struct rr_game *this, float delta)
 {
     if (this->ticks_until_text_cache == 0)
@@ -1533,7 +1581,8 @@ void rr_game_tick(struct rr_game *this, float delta)
     this->text_input_focused = rr_is_text_input_focused();
     this->slots_unlocked =
         RR_SLOT_COUNT_FROM_LEVEL(level_from_xp(this->cache.experience));
-    rr_game_validate_loadout(this);
+    if (!this->simulation_ready)
+        rr_game_validate_loadout(this);
     rr_game_update_significant_rarity(this);
 
     rr_game_cache_data(this);
@@ -1759,6 +1808,7 @@ void rr_game_tick(struct rr_game *this, float delta)
     }
     this->block_ui_input = 0;
     this->block_fov_adjustment = 0;
+    rr_ui_drag_clear_slot_registry();
     rr_ui_container_refactor(this->window, this);
     rr_ui_render_element(this->window, this);
     rr_dom_set_cursor(this->cursor);

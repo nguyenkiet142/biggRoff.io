@@ -59,6 +59,8 @@ struct rr_player_info_modifiers
     // float rotation_direction;
     float reload_speed;
     float max_health_bonus;
+    float staff_damage_mult;
+    float staff_speed_mult;
 };
 
 struct rr_component_player_info
@@ -116,6 +118,19 @@ RR_SERVER_ONLY(void rr_component_player_info_set_update_loot(
 RR_SERVER_ONLY(
     void rr_component_player_info_petal_swap(struct rr_component_player_info *,
                                              struct rr_simulation *, uint8_t);)
+RR_SERVER_ONLY(
+    void rr_component_player_info_swap_slots(struct rr_component_player_info *,
+                                             struct rr_simulation *,
+                                             uint8_t, uint8_t,
+                                             uint8_t, uint8_t);)
+RR_SERVER_ONLY(
+    void rr_component_player_info_set_slot(struct rr_component_player_info *,
+                                           struct rr_simulation *,
+                                           uint8_t, uint8_t, uint8_t);)
+RR_SERVER_ONLY(
+    void rr_component_player_info_clear_slot(struct rr_component_player_info *,
+                                             struct rr_simulation *,
+                                             uint8_t);)
 
 RR_SERVER_ONLY(void rr_component_player_info_write(
                    struct rr_component_player_info *, struct proto_bug *, int,

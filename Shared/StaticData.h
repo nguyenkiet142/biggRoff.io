@@ -53,6 +53,9 @@ enum rr_serverbound_packet_header
     rr_serverbound_chat,
     rr_serverbound_chat_block,
     rr_serverbound_dev_cheat,
+    rr_serverbound_petal_swap_slots,
+    rr_serverbound_equip_petal,
+    rr_serverbound_unequip_petal,
 };
 
 enum rr_clientbound_packet_header
@@ -154,8 +157,12 @@ enum rr_petal_id
     rr_petal_id_cactus,      // 40
     rr_petal_id_cactus_golden, // 41
     rr_petal_id_fangs,         // 42
+    rr_petal_id_sponge,        // 43
+    rr_petal_id_cotton,        // 44
+    rr_petal_id_missle,        // 45
+    rr_petal_id_staff,         // 46
 
-    rr_petal_id_max,           // 43
+    rr_petal_id_max,           // 47
 };
 
 enum rr_mob_id

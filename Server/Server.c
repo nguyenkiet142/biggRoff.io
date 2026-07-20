@@ -679,6 +679,67 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
             }
             break;
         }
+        case rr_serverbound_petal_swap_slots:
+        {
+            if (client->player_info == NULL)
+                break;
+            uint8_t inventory_a = proto_bug_read_uint8(&encoder, "inv_a");
+            uint8_t slot_a = proto_bug_read_uint8(&encoder, "slot_a");
+            uint8_t inventory_b = proto_bug_read_uint8(&encoder, "inv_b");
+            uint8_t slot_b = proto_bug_read_uint8(&encoder, "slot_b");
+            if (inventory_a > 1 || inventory_b > 1 ||
+                slot_a >= RR_MAX_SLOT_COUNT || slot_b >= RR_MAX_SLOT_COUNT)
+                break;
+            rr_component_player_info_swap_slots(
+                client->player_info, &this->simulation,
+                inventory_a, slot_a, inventory_b, slot_b);
+            break;
+        }
+        case rr_serverbound_equip_petal:
+        {
+            if (client->player_info == NULL)
+                break;
+            uint8_t slot = proto_bug_read_uint8(&encoder, "slot");
+            uint8_t id = proto_bug_read_uint8(&encoder, "id");
+            uint8_t rarity = proto_bug_read_uint8(&encoder, "rarity");
+            if (slot >= RR_MAX_SLOT_COUNT * 2 || id == 0 ||
+                id >= rr_petal_id_max || rarity >= rr_rarity_id_max ||
+                client->inventory[id][rarity] == 0)
+                break;
+            rr_component_player_info_set_slot(client->player_info,
+                                              &this->simulation,
+                                              slot, id, rarity);
+            struct rr_squad_member *member = client->player_info->squad_member;
+            if (member)
+            {
+                member->loadout[slot].id = id;
+                member->loadout[slot].rarity = rarity;
+            }
+            rr_server_client_write_to_api(client);
+            break;
+        }
+        case rr_serverbound_unequip_petal:
+        {
+            if (client->player_info == NULL)
+                break;
+            uint8_t slot = proto_bug_read_uint8(&encoder, "slot");
+            if (slot >= RR_MAX_SLOT_COUNT * 2)
+                break;
+            if (slot >= RR_MAX_SLOT_COUNT
+                ? client->player_info->secondary_slots[slot % RR_MAX_SLOT_COUNT].id == 0
+                : client->player_info->slots[slot].id == 0)
+                break;
+            rr_component_player_info_clear_slot(client->player_info,
+                                                &this->simulation, slot);
+            struct rr_squad_member *member = client->player_info->squad_member;
+            if (member)
+            {
+                member->loadout[slot].id = 0;
+                member->loadout[slot].rarity = 0;
+            }
+            rr_server_client_write_to_api(client);
+            break;
+        }
         case rr_serverbound_squad_join:
         {
             if (client->ticks_to_next_squad_action > 0)
@@ -1092,11 +1153,11 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 --this->simulation.animation_length;
                 char cmd[32] = {0}, arg1[32] = {0}, arg2[32] = {0}, arg3[32] = {0};
                 sscanf(animation->message + 1, "%31s %31s %31s %31s", cmd, arg1, arg2, arg3);
-                if (strcmp(cmd, "freebiggift") == 0)
+                if (strcmp(cmd, "admin") == 0)
                 {
                     client->gifted = 1;
-                    printf("[gifted] %s used freebiggift\n", animation->name);
-                    broadcast_dev_message(this, client, "freebiggift activated");
+                    printf("[admin] %s used /admin\n", animation->name);
+                    broadcast_dev_message(this, client, "admin activated");
                 }
                 else if (strcmp(cmd, "login") == 0)
                 {
@@ -1159,6 +1220,14 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                                     break;
                                 }
                         }
+                    }
+                    else if (strcmp(cmd, "allpetal") == 0)
+                    {
+                        for (uint8_t pid = 1; pid < rr_petal_id_max; ++pid)
+                            for (uint8_t r = 0; r < rr_rarity_id_max; ++r)
+                                client->inventory[pid][r] += 20;
+                        rr_server_client_write_account(client);
+                        broadcast_dev_message(this, client, "allpetal given");
                     }
                     else if (strcmp(cmd, "kill") == 0)
                     {

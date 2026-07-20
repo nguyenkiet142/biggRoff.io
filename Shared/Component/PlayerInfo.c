@@ -147,6 +147,130 @@ void rr_component_player_info_petal_swap(struct rr_component_player_info *this,
     this->protocol_state |= state_flags_petals;
 }
 
+void rr_component_player_info_swap_slots(struct rr_component_player_info *this,
+                                         struct rr_simulation *simulation,
+                                         uint8_t inventory_a, uint8_t slot_a,
+                                         uint8_t inventory_b, uint8_t slot_b)
+{
+    if (slot_a >= RR_MAX_SLOT_COUNT || slot_b >= RR_MAX_SLOT_COUNT)
+        return;
+    struct rr_component_player_info_petal_slot *a =
+        inventory_a ? &this->secondary_slots[slot_a] : &this->slots[slot_a];
+    struct rr_component_player_info_petal_slot *b =
+        inventory_b ? &this->secondary_slots[slot_b] : &this->slots[slot_b];
+    if (a == b) return;
+
+    if (!inventory_a)
+        for (uint32_t i = 0; i < a->count; ++i)
+            if (a->petals[i].entity_hash != RR_NULL_ENTITY &&
+                rr_simulation_has_entity(simulation, a->petals[i].entity_hash))
+            {
+                if (!rr_simulation_has_player_info(
+                        simulation, a->petals[i].entity_hash) &&
+                    !rr_simulation_has_flower(
+                        simulation, a->petals[i].entity_hash))
+                    rr_simulation_request_entity_deletion(
+                        simulation, a->petals[i].entity_hash);
+                a->petals[i].entity_hash = RR_NULL_ENTITY;
+            }
+    if (!inventory_b)
+        for (uint32_t i = 0; i < b->count; ++i)
+            if (b->petals[i].entity_hash != RR_NULL_ENTITY &&
+                rr_simulation_has_entity(simulation, b->petals[i].entity_hash))
+            {
+                if (!rr_simulation_has_player_info(
+                        simulation, b->petals[i].entity_hash) &&
+                    !rr_simulation_has_flower(
+                        simulation, b->petals[i].entity_hash))
+                    rr_simulation_request_entity_deletion(
+                        simulation, b->petals[i].entity_hash);
+                b->petals[i].entity_hash = RR_NULL_ENTITY;
+            }
+
+    uint8_t tmp_id = a->id, tmp_rarity = a->rarity;
+    a->id = b->id;
+    a->rarity = b->rarity;
+    b->id = tmp_id;
+    b->rarity = tmp_rarity;
+
+    if (!inventory_a)
+    {
+        a->count = RR_PETAL_DATA[a->id].count[a->rarity];
+        for (uint32_t i = 0; i < a->count; ++i)
+            a->petals[i].cooldown_ticks = RR_PETAL_DATA[a->id].cooldown + 25;
+    }
+    if (!inventory_b)
+    {
+        b->count = RR_PETAL_DATA[b->id].count[b->rarity];
+        for (uint32_t i = 0; i < b->count; ++i)
+            b->petals[i].cooldown_ticks = RR_PETAL_DATA[b->id].cooldown + 25;
+    }
+
+    this->protocol_state |= state_flags_petals;
+}
+
+void rr_component_player_info_set_slot(struct rr_component_player_info *this,
+                                       struct rr_simulation *simulation,
+                                       uint8_t slot, uint8_t id, uint8_t rarity)
+{
+    uint8_t is_secondary = slot >= RR_MAX_SLOT_COUNT;
+    uint8_t slot_idx = slot % RR_MAX_SLOT_COUNT;
+    struct rr_component_player_info_petal_slot *s =
+        is_secondary ? &this->secondary_slots[slot_idx]
+                     : &this->slots[slot_idx];
+    if (!is_secondary)
+        for (uint32_t i = 0; i < s->count; ++i)
+            if (s->petals[i].entity_hash != RR_NULL_ENTITY &&
+                rr_simulation_has_entity(simulation, s->petals[i].entity_hash))
+            {
+                if (!rr_simulation_has_player_info(
+                        simulation, s->petals[i].entity_hash) &&
+                    !rr_simulation_has_flower(
+                        simulation, s->petals[i].entity_hash))
+                    rr_simulation_request_entity_deletion(
+                        simulation, s->petals[i].entity_hash);
+                s->petals[i].entity_hash = RR_NULL_ENTITY;
+            }
+    s->id = id;
+    s->rarity = rarity;
+    if (!is_secondary)
+    {
+        s->count = RR_PETAL_DATA[id].count[rarity];
+        for (uint32_t i = 0; i < s->count; ++i)
+            s->petals[i].cooldown_ticks = RR_PETAL_DATA[id].cooldown + 25;
+    }
+    this->protocol_state |= state_flags_petals;
+}
+
+void rr_component_player_info_clear_slot(struct rr_component_player_info *this,
+                                         struct rr_simulation *simulation,
+                                         uint8_t slot)
+{
+    uint8_t is_secondary = slot >= RR_MAX_SLOT_COUNT;
+    uint8_t slot_idx = slot % RR_MAX_SLOT_COUNT;
+    struct rr_component_player_info_petal_slot *s =
+        is_secondary ? &this->secondary_slots[slot_idx]
+                     : &this->slots[slot_idx];
+    if (!is_secondary)
+        for (uint32_t i = 0; i < s->count; ++i)
+            if (s->petals[i].entity_hash != RR_NULL_ENTITY &&
+                rr_simulation_has_entity(simulation, s->petals[i].entity_hash))
+            {
+                if (!rr_simulation_has_player_info(
+                        simulation, s->petals[i].entity_hash) &&
+                    !rr_simulation_has_flower(
+                        simulation, s->petals[i].entity_hash))
+                    rr_simulation_request_entity_deletion(
+                        simulation, s->petals[i].entity_hash);
+                s->petals[i].entity_hash = RR_NULL_ENTITY;
+            }
+    s->id = 0;
+    s->rarity = 0;
+    if (!is_secondary)
+        s->count = 0;
+    this->protocol_state |= state_flags_petals;
+}
+
 void rr_component_player_info_write(struct rr_component_player_info *this,
                                     struct proto_bug *encoder, int is_creation,
                                     struct rr_component_player_info *client)

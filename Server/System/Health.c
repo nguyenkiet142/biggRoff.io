@@ -63,6 +63,33 @@ static void system_default_idle_heal(EntityIdx entity, void *captures)
     if (health->damage_paused > 0)
         health->damage_paused -= 1;
 
+    if (health->sponge_remaining_ticks > 0 && health->sponge_damage_pool > 0)
+    {
+        float pool_dmg = health->sponge_damage_pool / health->sponge_remaining_ticks;
+        if (pool_dmg > health->sponge_damage_pool)
+            pool_dmg = health->sponge_damage_pool;
+        if (rr_simulation_has_flower(this, entity) &&
+            health->cotton_hash != RR_NULL_ENTITY)
+        {
+            struct rr_component_health *ch = rr_simulation_get_health(this, health->cotton_hash);
+            if (ch && ch->health > 0)
+            {
+                float absorb = pool_dmg < ch->health ? pool_dmg : ch->health;
+                rr_component_health_set_health(ch, ch->health - absorb);
+                if (ch->health <= 0)
+                    health->cotton_hash = RR_NULL_ENTITY;
+            }
+            else
+                health->cotton_hash = RR_NULL_ENTITY;
+        }
+        else
+            rr_component_health_set_health(health, health->health - pool_dmg);
+        health->sponge_damage_pool -= pool_dmg;
+        --health->sponge_remaining_ticks;
+    }
+    else if (health->sponge_remaining_ticks == 0)
+        health->sponge_damage_pool = 0;
+
     if (health->health == 0)
     {
         if (rr_simulation_has_flower(this, entity))
@@ -159,7 +186,8 @@ static void lightning_petal_system(struct rr_simulation *simulation,
             &captures, lightning_filter);
     }
     animation->length = captures.length;
-    if (!dev_cheat_enabled(simulation, petal->parent_id, invulnerable))
+    if (petal->id != rr_petal_id_mjolnir &&
+        !dev_cheat_enabled(simulation, petal->parent_id, invulnerable))
         rr_simulation_request_entity_deletion(simulation, petal->parent_id);
 }
 
@@ -300,6 +328,19 @@ static uint8_t damage_effect(struct rr_simulation *simulation, EntityIdx target,
                         RR_PETAL_DATA[petal->id].scale[petal->rarity].damage /
                         RR_PETAL_DATA[petal->id].count[petal->rarity];
         }
+        else if (petal->id == rr_petal_id_missle)
+        {
+            struct rr_component_health *health =
+                rr_simulation_get_health(simulation, attacker);
+            struct rr_component_relations *relations =
+                rr_simulation_get_relations(simulation, attacker);
+            if (petal->detached &&
+                rr_simulation_has_flower(simulation, relations->owner))
+                health->damage =
+                    RR_PETAL_DATA[petal->id].damage *
+                    RR_PETAL_DATA[petal->id].scale[petal->rarity].damage /
+                    RR_PETAL_DATA[petal->id].count[petal->rarity];
+        }
         else if (petal->id == rr_petal_id_beak)
         {
             struct rr_component_physical *physical =
@@ -309,7 +350,7 @@ static uint8_t damage_effect(struct rr_simulation *simulation, EntityIdx target,
                 (1 + sqrtf(RR_PETAL_RARITY_SCALE[petal->rarity].heal) / 3) *
                 (1 - physical->slow_resist);
         }
-        else if (petal->id == rr_petal_id_lightning)
+        else if (petal->id == rr_petal_id_lightning || petal->id == rr_petal_id_mjolnir)
         {
             lightning_petal_system(simulation, petal, target);
             return 0;
@@ -378,9 +419,48 @@ static void colliding_with_function(uint64_t i, void *_captures)
     {
         if (damage_effect(this, entity1, entity2))
         {
-            rr_component_health_do_damage(
-                this, health1, entity2, health2->damage,
-                rr_animation_color_type_damage);
+            float remaining = health2->damage;
+            if (rr_simulation_has_flower(this, entity1))
+            {
+                if (health1->cotton_active)
+                {
+                    if (health1->cotton_hash != RR_NULL_ENTITY)
+                    {
+                        struct rr_component_health *ch = rr_simulation_get_health(this, health1->cotton_hash);
+                        if (ch && ch->health > 0)
+                        {
+                            float absorb = remaining < ch->health ? remaining : ch->health;
+                            rr_component_health_do_damage(this, ch, entity2, absorb, rr_animation_color_type_damage);
+                            remaining -= absorb;
+                            if (ch->health <= 0)
+                            {
+                                health1->cotton_hash = RR_NULL_ENTITY;
+                                health1->cotton_absorb_pool = 0;
+                            }
+                        }
+                        else
+                        {
+                            health1->cotton_hash = RR_NULL_ENTITY;
+                            health1->cotton_absorb_pool = 0;
+                        }
+                    }
+                    if (health1->cotton_hash == RR_NULL_ENTITY && remaining > 0 && health1->cotton_absorb_pool > 0)
+                    {
+                        float absorb = remaining < health1->cotton_absorb_pool ? remaining : health1->cotton_absorb_pool;
+                        health1->cotton_absorb_pool -= absorb;
+                        remaining -= absorb;
+                    }
+                }
+                if (remaining > 0 && health1->sponge_remaining_ticks > 0)
+                {
+                    health1->sponge_damage_pool += remaining;
+                    if (health1->sponge_damage_pool > 1000000.0f)
+                        health1->sponge_damage_pool = 1000000.0f;
+                    remaining = 0;
+                }
+            }
+            if (remaining > 0)
+                rr_component_health_do_damage(this, health1, entity2, remaining, rr_animation_color_type_damage);
             health1->damage_paused = byp2 ? 3 : 8;
         }
     }
@@ -388,9 +468,48 @@ static void colliding_with_function(uint64_t i, void *_captures)
     {
         if (damage_effect(this, entity2, entity1))
         {
-            rr_component_health_do_damage(
-                this, health2, entity1, health1->damage,
-                rr_animation_color_type_damage);
+            float remaining = health1->damage;
+            if (rr_simulation_has_flower(this, entity2))
+            {
+                if (health2->cotton_active)
+                {
+                    if (health2->cotton_hash != RR_NULL_ENTITY)
+                    {
+                        struct rr_component_health *ch = rr_simulation_get_health(this, health2->cotton_hash);
+                        if (ch && ch->health > 0)
+                        {
+                            float absorb = remaining < ch->health ? remaining : ch->health;
+                            rr_component_health_do_damage(this, ch, entity1, absorb, rr_animation_color_type_damage);
+                            remaining -= absorb;
+                            if (ch->health <= 0)
+                            {
+                                health2->cotton_hash = RR_NULL_ENTITY;
+                                health2->cotton_absorb_pool = 0;
+                            }
+                        }
+                        else
+                        {
+                            health2->cotton_hash = RR_NULL_ENTITY;
+                            health2->cotton_absorb_pool = 0;
+                        }
+                    }
+                    if (health2->cotton_hash == RR_NULL_ENTITY && remaining > 0 && health2->cotton_absorb_pool > 0)
+                    {
+                        float absorb = remaining < health2->cotton_absorb_pool ? remaining : health2->cotton_absorb_pool;
+                        health2->cotton_absorb_pool -= absorb;
+                        remaining -= absorb;
+                    }
+                }
+                if (remaining > 0 && health2->sponge_remaining_ticks > 0)
+                {
+                    health2->sponge_damage_pool += remaining;
+                    if (health2->sponge_damage_pool > 1000000.0f)
+                        health2->sponge_damage_pool = 1000000.0f;
+                    remaining = 0;
+                }
+            }
+            if (remaining > 0)
+                rr_component_health_do_damage(this, health2, entity1, remaining, rr_animation_color_type_damage);
             health2->damage_paused = byp2 ? 3 : 8;
         }
     }

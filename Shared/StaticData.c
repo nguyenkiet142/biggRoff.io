@@ -95,6 +95,10 @@ struct rr_petal_data RR_PETAL_DATA[rr_petal_id_max] = {
     {rr_petal_id_cactus,        rr_rarity_id_common,   defensive, 1.0f,  15.0f,   0.0f,  50,  0, {1,1,1,1,1,1,1,1,1,2,2}},
     {rr_petal_id_cactus_golden, rr_rarity_id_unusual,  defensive, 2.0f,  25.0f,   0.0f,  50,  0, {1,1,1,1,1,1,1,1,1,2,2}},
     {rr_petal_id_fangs,         rr_rarity_id_unusual,  offensive,20.0f,  15.0f,  10.0f,  60,  0, {1,1,1,1,1,1,1,1,1,2,2}},
+    {rr_petal_id_sponge,        rr_rarity_id_unusual,  defensive, 5.0f,  25.0f,   0.0f,  60,  0, {1,1,1,1,1,1,1,1,1,2,2}},
+    {rr_petal_id_cotton,        rr_rarity_id_common,   defensive, 1.0f,  30.0f,   0.0f,  50,  0, {1,1,1,1,1,1,1,1,1,2,2}},
+    {rr_petal_id_missle,        rr_rarity_id_rare,     offensive, 10.0f, 16.0f,   0.0f,  50, 13, {1,1,1,1,1,2,3,3,3,4,4}},
+    {rr_petal_id_staff,         rr_rarity_id_common,   defensive, 1.0f,  20.0f,  12.0f,  50,  0, {1,1,1,1,1,1,1,1,1,1,1}},
 };    
 
 char const *RR_PETAL_NAMES[rr_petal_id_max] = {
@@ -112,6 +116,10 @@ char const *RR_PETAL_NAMES[rr_petal_id_max] = {
     "Cactus",
     "Cactus Golden",
     "Fangs",
+    "Sponge",
+    "Cotton",
+    "Missle",
+    "Staff",
 };
     
 char const *RR_PETAL_DESCRIPTIONS[rr_petal_id_max] = {
@@ -158,6 +166,10 @@ char const *RR_PETAL_DESCRIPTIONS[rr_petal_id_max] = {
     "Spiky and defensive",
     "Spiky and golden",
     "Heals based on damage dealt by this petal",
+    "Spreads damage taken by the flower over a period of time.\nIf destroyed, deals remaining damage all at once.",
+    "Absorbs damage taken by the flower",
+    "A homing missile",
+    "Buffs your pets' speed and damage.\nRight-click to call them back.",
 };
 
 struct rr_mob_data RR_MOB_DATA[rr_mob_id_max] = {

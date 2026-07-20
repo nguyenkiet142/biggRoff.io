@@ -20,6 +20,7 @@
 #include <Client/Renderer/Renderer.h>
 #include <Client/Socket.h>
 #include <Client/Ui/Ui.h>
+#include <Client/Ui/InGame/LoadoutDrag.h>
 #include <Shared/Entity.h>
 #include <Shared/Rivet.h>
 #include <Shared/Squad.h>
@@ -197,6 +198,7 @@ struct rr_game
     struct rr_ui_element *focused;
     struct rr_ui_element *pressed;
     struct rr_ui_element *anti_afk;
+    struct rr_drag_state drag_state;
 
     struct rr_renderer *renderer;
     struct rr_input_data *input_data;
@@ -243,6 +245,10 @@ void rr_game_tick(struct rr_game *, float);
 void rr_game_connect_socket(struct rr_game *);
 void rr_simulation_read_binary(struct rr_game *, struct proto_bug *);
 void rr_write_dev_cheat_packets(struct rr_game *, uint8_t);
+void rr_game_send_petal_swap_slots(struct rr_game *, uint8_t, uint8_t,
+                                    uint8_t, uint8_t);
+void rr_game_send_equip_petal(struct rr_game *, uint8_t, uint8_t, uint8_t);
+void rr_game_send_unequip_petal(struct rr_game *, uint8_t);
 
 void rr_game_websocket_on_event_function(enum rr_websocket_event_type, void *,
                                          void *, uint64_t);

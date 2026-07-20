@@ -48,6 +48,12 @@ struct rr_component_health
     RR_SERVER_ONLY(float squad_damage_counter[RR_SQUAD_COUNT];)
     RR_SERVER_ONLY(float gradually_healed;)
     RR_SERVER_ONLY(uint8_t gradually_healed_ticks;)
+    RR_SERVER_ONLY(float sponge_damage_pool;)
+    RR_SERVER_ONLY(uint16_t sponge_remaining_ticks;)
+    RR_SERVER_ONLY(EntityHash cotton_hash;)
+    RR_SERVER_ONLY(float cotton_absorb_pool;)
+    RR_SERVER_ONLY(uint8_t cotton_active;)
+    RR_SERVER_ONLY(uint8_t cotton_has_spawned;)
 };
 
 void rr_component_health_init(struct rr_component_health *,

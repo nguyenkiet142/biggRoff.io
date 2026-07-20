@@ -240,228 +240,14 @@ void rr_renderer_draw_petal(struct rr_renderer *renderer, uint8_t id,
         case rr_petal_id_none:
             break;
         case rr_petal_id_basic:
-        {
-            {
-                struct rr_renderer_context_state st0;
-                rr_renderer_context_state_init(renderer, &st0);
-                rr_renderer_translate(renderer, 0.0f, 1.0f);
-
-                // PHASE 1: oversized strokes (width ×2 = 9.0f) → builds full silhouette
-                rr_renderer_set_stroke(renderer, 0xffC2A37D);
-                rr_renderer_set_line_width(renderer, 9.0f);
-                rr_renderer_set_line_join(renderer, 1);
-                {
-                    struct rr_renderer_context_state st1;
-                    rr_renderer_context_state_init(renderer, &st1);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_move_to(renderer, -1.11f, -5.9f);
-                    rr_renderer_quadratic_curve_to(renderer, 0.0f, -7.2f, 1.11f, -5.9f);
-                    rr_renderer_line_to(renderer, 1.11f, -5.9f);
-                    rr_renderer_quadratic_curve_to(renderer, 2.22f, -4.61f, 3.92f, -4.55f);
-                    rr_renderer_line_to(renderer, 3.92f, -4.55f);
-                    rr_renderer_quadratic_curve_to(renderer, 5.63f, -4.49f, 5.31f, -2.81f);
-                    rr_renderer_line_to(renderer, 5.31f, -2.81f);
-                    rr_renderer_quadratic_curve_to(renderer, 4.98f, -1.14f, 6.0f, 0.23f);
-                    rr_renderer_line_to(renderer, 6.0f, 0.23f);
-                    rr_renderer_quadratic_curve_to(renderer, 7.02f, 1.6f, 5.51f, 2.39f);
-                    rr_renderer_line_to(renderer, 5.51f, 2.39f);
-                    rr_renderer_quadratic_curve_to(renderer, 4.0f, 3.19f, 3.56f, 4.84f);
-                    rr_renderer_line_to(renderer, 3.56f, 4.84f);
-                    rr_renderer_quadratic_curve_to(renderer, 3.12f, 6.49f, 1.56f, 5.8f);
-                    rr_renderer_line_to(renderer, 1.56f, 5.8f);
-                    rr_renderer_quadratic_curve_to(renderer, 0.0f, 5.11f, -1.56f, 5.8f);
-                    rr_renderer_line_to(renderer, -1.56f, 5.8f);
-                    rr_renderer_quadratic_curve_to(renderer, -3.12f, 6.49f, -3.56f, 4.84f);
-                    rr_renderer_line_to(renderer, -3.56f, 4.84f);
-                    rr_renderer_quadratic_curve_to(renderer, -4.0f, 3.19f, -5.51f, 2.39f);
-                    rr_renderer_line_to(renderer, -5.51f, 2.39f);
-                    rr_renderer_quadratic_curve_to(renderer, -7.02f, 1.6f, -6.0f, 0.23f);
-                    rr_renderer_line_to(renderer, -6.0f, 0.23f);
-                    rr_renderer_quadratic_curve_to(renderer, -4.98f, -1.14f, -5.31f, -2.81f);
-                    rr_renderer_line_to(renderer, -5.31f, -2.81f);
-                    rr_renderer_quadratic_curve_to(renderer, -5.63f, -4.49f, -3.92f, -4.55f);
-                    rr_renderer_line_to(renderer, -3.92f, -4.55f);
-                    rr_renderer_quadratic_curve_to(renderer, -2.22f, -4.61f, -1.11f, -5.9f);
-                    rr_renderer_line_to(renderer, -1.11f, -5.9f);
-                    rr_renderer_stroke(renderer);
-                    rr_renderer_context_state_free(renderer, &st1);
-                }
-                {
-                    struct rr_renderer_context_state st2;
-                    rr_renderer_context_state_init(renderer, &st2);
-                    rr_renderer_translate(renderer, 0.0f, -5.6f);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_stroke(renderer);
-                    rr_renderer_context_state_free(renderer, &st2);
-                }
-                {
-                    struct rr_renderer_context_state st3;
-                    rr_renderer_context_state_init(renderer, &st3);
-                    rr_renderer_translate(renderer, 2.13f, 4.8f);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_stroke(renderer);
-                    rr_renderer_context_state_free(renderer, &st3);
-                }
-                {
-                    struct rr_renderer_context_state st4;
-                    rr_renderer_context_state_init(renderer, &st4);
-                    rr_renderer_translate(renderer, -2.67f, 4.8f);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_stroke(renderer);
-                    rr_renderer_context_state_free(renderer, &st4);
-                }
-                {
-                    struct rr_renderer_context_state st5;
-                    rr_renderer_context_state_init(renderer, &st5);
-                    rr_renderer_translate(renderer, 4.0f, -3.47f);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_stroke(renderer);
-                    rr_renderer_context_state_free(renderer, &st5);
-                }
-                {
-                    struct rr_renderer_context_state st6;
-                    rr_renderer_context_state_init(renderer, &st6);
-                    rr_renderer_translate(renderer, 4.8f, 1.07f);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_stroke(renderer);
-                    rr_renderer_context_state_free(renderer, &st6);
-                }
-                {
-                    struct rr_renderer_context_state st7;
-                    rr_renderer_context_state_init(renderer, &st7);
-                    rr_renderer_translate(renderer, -4.27f, -3.47f);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_stroke(renderer);
-                    rr_renderer_context_state_free(renderer, &st7);
-                }
-                {
-                    struct rr_renderer_context_state st8;
-                    rr_renderer_context_state_init(renderer, &st8);
-                    rr_renderer_translate(renderer, -5.07f, 0.8f);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_stroke(renderer);
-                    rr_renderer_context_state_free(renderer, &st8);
-                }
-
-                // PHASE 2: fills cover inner half of strokes → only outer border remains
-                {
-                    struct rr_renderer_context_state st9;
-                    rr_renderer_context_state_init(renderer, &st9);
-                    rr_renderer_set_fill(renderer, 0xffEFC99A);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_move_to(renderer, -1.11f, -5.9f);
-                    rr_renderer_quadratic_curve_to(renderer, 0.0f, -7.2f, 1.11f, -5.9f);
-                    rr_renderer_line_to(renderer, 1.11f, -5.9f);
-                    rr_renderer_quadratic_curve_to(renderer, 2.22f, -4.61f, 3.92f, -4.55f);
-                    rr_renderer_line_to(renderer, 3.92f, -4.55f);
-                    rr_renderer_quadratic_curve_to(renderer, 5.63f, -4.49f, 5.31f, -2.81f);
-                    rr_renderer_line_to(renderer, 5.31f, -2.81f);
-                    rr_renderer_quadratic_curve_to(renderer, 4.98f, -1.14f, 6.0f, 0.23f);
-                    rr_renderer_line_to(renderer, 6.0f, 0.23f);
-                    rr_renderer_quadratic_curve_to(renderer, 7.02f, 1.6f, 5.51f, 2.39f);
-                    rr_renderer_line_to(renderer, 5.51f, 2.39f);
-                    rr_renderer_quadratic_curve_to(renderer, 4.0f, 3.19f, 3.56f, 4.84f);
-                    rr_renderer_line_to(renderer, 3.56f, 4.84f);
-                    rr_renderer_quadratic_curve_to(renderer, 3.12f, 6.49f, 1.56f, 5.8f);
-                    rr_renderer_line_to(renderer, 1.56f, 5.8f);
-                    rr_renderer_quadratic_curve_to(renderer, 0.0f, 5.11f, -1.56f, 5.8f);
-                    rr_renderer_line_to(renderer, -1.56f, 5.8f);
-                    rr_renderer_quadratic_curve_to(renderer, -3.12f, 6.49f, -3.56f, 4.84f);
-                    rr_renderer_line_to(renderer, -3.56f, 4.84f);
-                    rr_renderer_quadratic_curve_to(renderer, -4.0f, 3.19f, -5.51f, 2.39f);
-                    rr_renderer_line_to(renderer, -5.51f, 2.39f);
-                    rr_renderer_quadratic_curve_to(renderer, -7.02f, 1.6f, -6.0f, 0.23f);
-                    rr_renderer_line_to(renderer, -6.0f, 0.23f);
-                    rr_renderer_quadratic_curve_to(renderer, -4.98f, -1.14f, -5.31f, -2.81f);
-                    rr_renderer_line_to(renderer, -5.31f, -2.81f);
-                    rr_renderer_quadratic_curve_to(renderer, -5.63f, -4.49f, -3.92f, -4.55f);
-                    rr_renderer_line_to(renderer, -3.92f, -4.55f);
-                    rr_renderer_quadratic_curve_to(renderer, -2.22f, -4.61f, -1.11f, -5.9f);
-                    rr_renderer_line_to(renderer, -1.11f, -5.9f);
-                    rr_renderer_fill(renderer);
-                    rr_renderer_context_state_free(renderer, &st9);
-                }
-                {
-                    struct rr_renderer_context_state st10;
-                    rr_renderer_context_state_init(renderer, &st10);
-                    rr_renderer_translate(renderer, 0.0f, -5.6f);
-                    rr_renderer_set_fill(renderer, 0xffEFC99A);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_fill(renderer);
-                    rr_renderer_context_state_free(renderer, &st10);
-                }
-                {
-                    struct rr_renderer_context_state st11;
-                    rr_renderer_context_state_init(renderer, &st11);
-                    rr_renderer_translate(renderer, 2.13f, 4.8f);
-                    rr_renderer_set_fill(renderer, 0xffEFC99A);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_fill(renderer);
-                    rr_renderer_context_state_free(renderer, &st11);
-                }
-                {
-                    struct rr_renderer_context_state st12;
-                    rr_renderer_context_state_init(renderer, &st12);
-                    rr_renderer_translate(renderer, -2.67f, 4.8f);
-                    rr_renderer_set_fill(renderer, 0xffEFC99A);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_fill(renderer);
-                    rr_renderer_context_state_free(renderer, &st12);
-                }
-                {
-                    struct rr_renderer_context_state st13;
-                    rr_renderer_context_state_init(renderer, &st13);
-                    rr_renderer_translate(renderer, 4.0f, -3.47f);
-                    rr_renderer_set_fill(renderer, 0xffEFC99A);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_fill(renderer);
-                    rr_renderer_context_state_free(renderer, &st13);
-                }
-                {
-                    struct rr_renderer_context_state st14;
-                    rr_renderer_context_state_init(renderer, &st14);
-                    rr_renderer_translate(renderer, 4.8f, 1.07f);
-                    rr_renderer_set_fill(renderer, 0xffEFC99A);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_fill(renderer);
-                    rr_renderer_context_state_free(renderer, &st14);
-                }
-                {
-                    struct rr_renderer_context_state st15;
-                    rr_renderer_context_state_init(renderer, &st15);
-                    rr_renderer_translate(renderer, -4.27f, -3.47f);
-                    rr_renderer_set_fill(renderer, 0xffEFC99A);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_fill(renderer);
-                    rr_renderer_context_state_free(renderer, &st15);
-                }
-                {
-                    struct rr_renderer_context_state st16;
-                    rr_renderer_context_state_init(renderer, &st16);
-                    rr_renderer_translate(renderer, -5.07f, 0.8f);
-                    rr_renderer_set_fill(renderer, 0xffEFC99A);
-                    rr_renderer_begin_path(renderer);
-                    rr_renderer_arc(renderer, 0, 0, 2.13f);
-                    rr_renderer_fill(renderer);
-                    rr_renderer_context_state_free(renderer, &st16);
-                }
-                rr_renderer_context_state_free(renderer, &st0);
-            }
+            rr_renderer_set_stroke(renderer, 0xffcfcfcf);
+            rr_renderer_set_fill(renderer, 0xffffffff);
+            rr_renderer_set_line_width(renderer, 3.0f);
+            rr_renderer_begin_path(renderer);
+            rr_renderer_arc(renderer, 0.0f, 0.0f, 10.0f);
+            rr_renderer_fill(renderer);
+            rr_renderer_stroke(renderer);
             break;
-        }
         case rr_petal_id_pellet:
             rr_renderer_set_stroke(renderer, 0xffcfcfcf);
             rr_renderer_set_fill(renderer, 0xffffffff);
@@ -2969,6 +2755,448 @@ void rr_renderer_draw_petal(struct rr_renderer *renderer, uint8_t id,
             }
             break;
         }
+        case rr_petal_id_sponge:
+        {
+            {
+                struct rr_renderer_context_state st0;
+                rr_renderer_context_state_init(renderer, &st0);
+                rr_renderer_translate(renderer, 0.0f, -1.0f);
+                rr_renderer_rotate(renderer, 0.19f);
+
+                rr_renderer_set_stroke(renderer, 0xffc2a37d);
+                rr_renderer_set_line_width(renderer, 7.0f);
+                rr_renderer_set_line_join(renderer, 1);
+                {
+                    struct rr_renderer_context_state st1;
+                    rr_renderer_context_state_init(renderer, &st1);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_move_to(renderer, 0.0f, -10.63f);
+                    rr_renderer_line_to(renderer, 8.31f, -6.63f);
+                    rr_renderer_line_to(renderer, 10.37f, 2.37f);
+                    rr_renderer_line_to(renderer, 4.61f, 9.58f);
+                    rr_renderer_line_to(renderer, -4.61f, 9.58f);
+                    rr_renderer_line_to(renderer, -10.37f, 2.37f);
+                    rr_renderer_line_to(renderer, -8.31f, -6.63f);
+                    rr_renderer_line_to(renderer, 0.0f, -10.63f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st1);
+                }
+                {
+                    struct rr_renderer_context_state st2;
+                    rr_renderer_context_state_init(renderer, &st2);
+                    rr_renderer_translate(renderer, -7.7f, -5.87f);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st2);
+                }
+                {
+                    struct rr_renderer_context_state st3;
+                    rr_renderer_context_state_init(renderer, &st3);
+                    rr_renderer_translate(renderer, 7.7f, -5.87f);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st3);
+                }
+                {
+                    struct rr_renderer_context_state st4;
+                    rr_renderer_context_state_init(renderer, &st4);
+                    rr_renderer_translate(renderer, 0.0f, -9.53f);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st4);
+                }
+                {
+                    struct rr_renderer_context_state st5;
+                    rr_renderer_context_state_init(renderer, &st5);
+                    rr_renderer_translate(renderer, 9.53f, 2.2f);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st5);
+                }
+                {
+                    struct rr_renderer_context_state st6;
+                    rr_renderer_context_state_init(renderer, &st6);
+                    rr_renderer_translate(renderer, 4.4f, 8.8f);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st6);
+                }
+                {
+                    struct rr_renderer_context_state st7;
+                    rr_renderer_context_state_init(renderer, &st7);
+                    rr_renderer_translate(renderer, -4.4f, 8.8f);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st7);
+                }
+                {
+                    struct rr_renderer_context_state st8;
+                    rr_renderer_context_state_init(renderer, &st8);
+                    rr_renderer_translate(renderer, -9.53f, 2.2f);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st8);
+                }
+
+                {
+                    struct rr_renderer_context_state st9;
+                    rr_renderer_context_state_init(renderer, &st9);
+                    rr_renderer_set_fill(renderer, 0xffefc99a);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_move_to(renderer, 0.0f, -10.63f);
+                    rr_renderer_line_to(renderer, 8.31f, -6.63f);
+                    rr_renderer_line_to(renderer, 10.37f, 2.37f);
+                    rr_renderer_line_to(renderer, 4.61f, 9.58f);
+                    rr_renderer_line_to(renderer, -4.61f, 9.58f);
+                    rr_renderer_line_to(renderer, -10.37f, 2.37f);
+                    rr_renderer_line_to(renderer, -8.31f, -6.63f);
+                    rr_renderer_line_to(renderer, 0.0f, -10.63f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st9);
+                }
+                {
+                    struct rr_renderer_context_state st10;
+                    rr_renderer_context_state_init(renderer, &st10);
+                    rr_renderer_translate(renderer, -7.7f, -5.87f);
+                    rr_renderer_set_fill(renderer, 0xffefc99a);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st10);
+                }
+                {
+                    struct rr_renderer_context_state st11;
+                    rr_renderer_context_state_init(renderer, &st11);
+                    rr_renderer_translate(renderer, 7.7f, -5.87f);
+                    rr_renderer_set_fill(renderer, 0xffefc99a);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st11);
+                }
+                {
+                    struct rr_renderer_context_state st12;
+                    rr_renderer_context_state_init(renderer, &st12);
+                    rr_renderer_translate(renderer, 0.0f, -9.53f);
+                    rr_renderer_set_fill(renderer, 0xffefc99a);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st12);
+                }
+                {
+                    struct rr_renderer_context_state st13;
+                    rr_renderer_context_state_init(renderer, &st13);
+                    rr_renderer_translate(renderer, 9.53f, 2.2f);
+                    rr_renderer_set_fill(renderer, 0xffefc99a);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st13);
+                }
+                {
+                    struct rr_renderer_context_state st14;
+                    rr_renderer_context_state_init(renderer, &st14);
+                    rr_renderer_translate(renderer, 4.4f, 8.8f);
+                    rr_renderer_set_fill(renderer, 0xffefc99a);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st14);
+                }
+                {
+                    struct rr_renderer_context_state st15;
+                    rr_renderer_context_state_init(renderer, &st15);
+                    rr_renderer_translate(renderer, -4.4f, 8.8f);
+                    rr_renderer_set_fill(renderer, 0xffefc99a);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st15);
+                }
+                {
+                    struct rr_renderer_context_state st16;
+                    rr_renderer_context_state_init(renderer, &st16);
+                    rr_renderer_translate(renderer, -9.53f, 2.2f);
+                    rr_renderer_set_fill(renderer, 0xffefc99a);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_arc(renderer, 0, 0, 4.08f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st16);
+                }
+                rr_renderer_context_state_free(renderer, &st0);
+            }
+            break;
+        }
+        case rr_petal_id_cotton:
+        {
+            {
+                struct rr_renderer_context_state st0;
+                rr_renderer_context_state_init(renderer, &st0);
+                rr_renderer_rotate(renderer, -1.09f);
+
+                rr_renderer_set_stroke(renderer, 0xffc1c1c1);
+                rr_renderer_set_line_width(renderer, 4.0f);
+                rr_renderer_set_line_join(renderer, 1);
+                {
+                    struct rr_renderer_context_state st1;
+                    rr_renderer_context_state_init(renderer, &st1);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_move_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, -21.0f, 5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, 5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 10.18f, -5.88f, 14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, 14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, 18.19f, 10.5f, 9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, 9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, 11.76f, -9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, -9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, -18.19f, 10.5f, -14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, -14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, -10.18f, -5.88f, -5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st1);
+                }
+                {
+                    struct rr_renderer_context_state st2;
+                    rr_renderer_context_state_init(renderer, &st2);
+                    rr_renderer_rotate(renderer, 0.86f);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_move_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, -21.0f, 5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, 5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 10.18f, -5.88f, 14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, 14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, 18.19f, 10.5f, 9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, 9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, 11.76f, -9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, -9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, -18.19f, 10.5f, -14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, -14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, -10.18f, -5.88f, -5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st2);
+                }
+                {
+                    struct rr_renderer_context_state st3;
+                    rr_renderer_context_state_init(renderer, &st3);
+                    rr_renderer_rotate(renderer, -0.65f);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_move_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, -21.0f, 5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, 5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 10.18f, -5.88f, 14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, 14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, 18.19f, 10.5f, 9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, 9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, 11.76f, -9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, -9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, -18.19f, 10.5f, -14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, -14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, -10.18f, -5.88f, -5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_stroke(renderer);
+                    rr_renderer_context_state_free(renderer, &st3);
+                }
+
+                {
+                    struct rr_renderer_context_state st4;
+                    rr_renderer_context_state_init(renderer, &st4);
+                    rr_renderer_set_fill(renderer, 0xffeeeeee);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_move_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, -21.0f, 5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, 5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 10.18f, -5.88f, 14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, 14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, 18.19f, 10.5f, 9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, 9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, 11.76f, -9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, -9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, -18.19f, 10.5f, -14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, -14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, -10.18f, -5.88f, -5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st4);
+                }
+                {
+                    struct rr_renderer_context_state st5;
+                    rr_renderer_context_state_init(renderer, &st5);
+                    rr_renderer_rotate(renderer, 0.86f);
+                    rr_renderer_set_fill(renderer, 0xffeeeeee);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_move_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, -21.0f, 5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, 5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 10.18f, -5.88f, 14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, 14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, 18.19f, 10.5f, 9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, 9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, 11.76f, -9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, -9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, -18.19f, 10.5f, -14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, -14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, -10.18f, -5.88f, -5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st5);
+                }
+                {
+                    struct rr_renderer_context_state st6;
+                    rr_renderer_context_state_init(renderer, &st6);
+                    rr_renderer_rotate(renderer, -0.65f);
+                    rr_renderer_set_fill(renderer, 0xffeeeeee);
+                    rr_renderer_begin_path(renderer);
+                    rr_renderer_move_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, -21.0f, 5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, 5.09f, -13.44f);
+                    rr_renderer_quadratic_curve_to(renderer, 10.18f, -5.88f, 14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, 14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, 18.19f, 10.5f, 9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, 9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, 0.0f, 11.76f, -9.09f, 11.13f);
+                    rr_renderer_line_to(renderer, -9.09f, 11.13f);
+                    rr_renderer_quadratic_curve_to(renderer, -18.19f, 10.5f, -14.19f, 2.31f);
+                    rr_renderer_line_to(renderer, -14.19f, 2.31f);
+                    rr_renderer_quadratic_curve_to(renderer, -10.18f, -5.88f, -5.09f, -13.44f);
+                    rr_renderer_line_to(renderer, -5.09f, -13.44f);
+                    rr_renderer_fill(renderer);
+                    rr_renderer_context_state_free(renderer, &st6);
+                }
+                rr_renderer_context_state_free(renderer, &st0);
+            }
+            break;
+        }
+        case rr_petal_id_missle:
+        {
+            {
+                struct rr_renderer_context_state st0;
+                rr_renderer_context_state_init(renderer, &st0);
+                rr_renderer_translate(renderer, 0.0f, 1.0f);
+                rr_renderer_rotate(renderer, 2.58f);
+                rr_renderer_set_fill(renderer, 0xff231f1f);
+                rr_renderer_begin_path(renderer);
+                rr_renderer_move_to(renderer, -3.33f, -15.93f);
+                rr_renderer_quadratic_curve_to(renderer, 0.0f, -26.55f, 3.33f, -15.93f);
+                rr_renderer_line_to(renderer, 9.15f, 2.65f);
+                rr_renderer_quadratic_curve_to(renderer, 12.47f, 13.27f, 5.82f, 13.28f);
+                rr_renderer_line_to(renderer, -5.82f, 13.28f);
+                rr_renderer_quadratic_curve_to(renderer, -12.47f, 13.28f, -9.15f, 2.66f);
+                rr_renderer_line_to(renderer, -3.33f, -15.93f);
+                rr_renderer_fill(renderer);
+                rr_renderer_context_state_free(renderer, &st0);
+            }
+            break;
+        }
+        case rr_petal_id_staff:
+        {
+            {
+                struct rr_renderer_context_state st0;
+                rr_renderer_context_state_init(renderer, &st0);
+                rr_renderer_translate(renderer, 0.0f, 7.0f);
+                rr_renderer_rotate(renderer, -1.56f);
+                rr_renderer_set_fill(renderer, 0xff7d5a1f);
+                rr_renderer_set_stroke(renderer, 0xff654b18);
+                rr_renderer_set_line_width(renderer, 2.0f);
+                rr_renderer_set_line_join(renderer, 1);
+                rr_renderer_begin_path(renderer);
+                rr_renderer_move_to(renderer, -8.75f, -1.67f);
+                rr_renderer_line_to(renderer, 8.75f, -1.67f);
+                rr_renderer_line_to(renderer, 8.75f, 1.67f);
+                rr_renderer_line_to(renderer, -8.75f, 1.67f);
+                rr_renderer_line_to(renderer, -8.75f, -1.67f);
+                rr_renderer_fill(renderer);
+                rr_renderer_stroke(renderer);
+                rr_renderer_context_state_free(renderer, &st0);
+            }
+            {
+                struct rr_renderer_context_state st1;
+                rr_renderer_context_state_init(renderer, &st1);
+                rr_renderer_translate(renderer, -3.0f, -3.0f);
+                rr_renderer_rotate(renderer, -2.26f);
+                rr_renderer_set_fill(renderer, 0xff7d5a1f);
+                rr_renderer_set_stroke(renderer, 0xff654b18);
+                rr_renderer_set_line_width(renderer, 2.0f);
+                rr_renderer_set_line_join(renderer, 1);
+                rr_renderer_begin_path(renderer);
+                rr_renderer_move_to(renderer, -3.75f, -1.67f);
+                rr_renderer_line_to(renderer, 3.75f, -1.67f);
+                rr_renderer_line_to(renderer, 3.75f, 1.67f);
+                rr_renderer_line_to(renderer, -3.75f, 1.67f);
+                rr_renderer_line_to(renderer, -3.75f, -1.67f);
+                rr_renderer_fill(renderer);
+                rr_renderer_stroke(renderer);
+                rr_renderer_context_state_free(renderer, &st1);
+            }
+            {
+                struct rr_renderer_context_state st2;
+                rr_renderer_context_state_init(renderer, &st2);
+                rr_renderer_translate(renderer, -4.0f, -8.0f);
+                rr_renderer_rotate(renderer, -0.94f);
+                rr_renderer_set_fill(renderer, 0xff7d5a1f);
+                rr_renderer_set_stroke(renderer, 0xff654b18);
+                rr_renderer_set_line_width(renderer, 2.0f);
+                rr_renderer_set_line_join(renderer, 1);
+                rr_renderer_begin_path(renderer);
+                rr_renderer_move_to(renderer, -3.75f, -1.67f);
+                rr_renderer_line_to(renderer, 3.75f, -1.67f);
+                rr_renderer_line_to(renderer, 3.75f, 1.67f);
+                rr_renderer_line_to(renderer, -3.75f, 1.67f);
+                rr_renderer_line_to(renderer, -3.75f, -1.67f);
+                rr_renderer_fill(renderer);
+                rr_renderer_stroke(renderer);
+                rr_renderer_context_state_free(renderer, &st2);
+            }
+            {
+                struct rr_renderer_context_state st3;
+                rr_renderer_context_state_init(renderer, &st3);
+                rr_renderer_translate(renderer, 1.0f, -10.0f);
+                rr_renderer_rotate(renderer, -0.04f);
+                rr_renderer_set_fill(renderer, 0xff7d5a1f);
+                rr_renderer_set_stroke(renderer, 0xff654b18);
+                rr_renderer_set_line_width(renderer, 2.0f);
+                rr_renderer_set_line_join(renderer, 1);
+                rr_renderer_begin_path(renderer);
+                rr_renderer_move_to(renderer, -3.75f, -1.67f);
+                rr_renderer_line_to(renderer, 3.75f, -1.67f);
+                rr_renderer_line_to(renderer, 3.75f, 1.67f);
+                rr_renderer_line_to(renderer, -3.75f, 1.67f);
+                rr_renderer_line_to(renderer, -3.75f, -1.67f);
+                rr_renderer_fill(renderer);
+                rr_renderer_stroke(renderer);
+                rr_renderer_context_state_free(renderer, &st3);
+            }
+            {
+                struct rr_renderer_context_state st4;
+                rr_renderer_context_state_init(renderer, &st4);
+                rr_renderer_translate(renderer, 5.0f, -8.0f);
+                rr_renderer_rotate(renderer, 0.93f);
+                rr_renderer_set_fill(renderer, 0xff7d5a1f);
+                rr_renderer_set_stroke(renderer, 0xff654b18);
+                rr_renderer_set_line_width(renderer, 2.0f);
+                rr_renderer_set_line_join(renderer, 1);
+                rr_renderer_begin_path(renderer);
+                rr_renderer_move_to(renderer, -3.75f, -1.67f);
+                rr_renderer_line_to(renderer, 3.75f, -1.67f);
+                rr_renderer_line_to(renderer, 3.75f, 1.67f);
+                rr_renderer_line_to(renderer, -3.75f, 1.67f);
+                rr_renderer_line_to(renderer, -3.75f, -1.67f);
+                rr_renderer_fill(renderer);
+                rr_renderer_stroke(renderer);
+                rr_renderer_context_state_free(renderer, &st4);
+            }
+            break;
+        }
         default:
             break;
         }
@@ -2985,7 +3213,7 @@ void rr_renderer_draw_static_petal(struct rr_renderer *renderer, uint8_t id,
         rr_renderer_rotate(renderer, 1.0f - M_PI / 4.0f);
     if (count <= 1)
     {
-        if (id == rr_petal_id_shell)
+        if (id == rr_petal_id_shell || id == rr_petal_id_missle)
             rr_renderer_rotate(renderer, 1.0f);
         else if (id == rr_petal_id_leaf)
             rr_renderer_rotate(renderer, -1.0f);
@@ -3009,6 +3237,8 @@ void rr_renderer_draw_static_petal(struct rr_renderer *renderer, uint8_t id,
             rr_renderer_rotate(renderer, -1.0f);
         else if (id == rr_petal_id_wax)
             rr_renderer_rotate(renderer, 0.3f);
+        else if (id == rr_petal_id_staff)
+            rr_renderer_rotate(renderer, 0.5f);
         rr_renderer_draw_petal(renderer, id, flags);
     }
     else

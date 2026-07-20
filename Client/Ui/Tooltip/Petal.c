@@ -206,13 +206,17 @@ struct rr_ui_element *rr_ui_petal_tooltip_init(uint8_t id, uint8_t rarity)
                               -1, 0));
     if (id != rr_petal_id_shell && id != rr_petal_id_crest &&
         id != rr_petal_id_third_eye && id != rr_petal_id_meat)
+    {
+        uint32_t dmg_color = (id == rr_petal_id_lightning || id == rr_petal_id_mjolnir)
+            ? 0xffccccfc : 0xffff4444;
         rr_ui_container_add_element(
             this,
             rr_ui_set_justify(rr_ui_h_container_init(
                                   rr_ui_container_init(), 0, 0,
-                                  rr_ui_text_init("Damage: ", 12, 0xffff4444),
+                                  rr_ui_text_init("Damage: ", 12, dmg_color),
                                   rr_ui_text_init(dmg, 12, 0xffffffff), NULL),
                               -1, 0));
+    }
     if (id == rr_petal_id_shell)
     {
         char *extra = malloc((sizeof *extra) * 16);
@@ -649,6 +653,43 @@ struct rr_ui_element *rr_ui_petal_tooltip_init(uint8_t id, uint8_t rarity)
                                   rr_ui_text_init("Damage Healed: ", 12, 0xFFFF94C9),
                                   rr_ui_text_init(pct_buf, 12, 0xFFFFFFFF), NULL),
                               -1, 0));
+    }
+    else if (id == rr_petal_id_sponge && rarity > 0)
+    {
+        char *period_buf = malloc(16);
+        static const uint8_t period_vals[] = {0, 6, 9, 12, 15, 18, 21, 24, 27, 30, 36};
+        uint8_t sec = rarity < rr_rarity_id_max ? period_vals[rarity] : 36;
+        sprintf(period_buf, "%us", sec);
+        rr_ui_container_add_element(
+            this,
+            rr_ui_set_justify(rr_ui_h_container_init(
+                                  rr_ui_container_init(), 0, 0,
+                                  rr_ui_text_init("Period: ", 12, 0xffD2EB34),
+                                  rr_ui_text_init(period_buf, 12, 0xFFFFFFFF), NULL),
+                              -1, 0));
+    }
+    else if (id == rr_petal_id_staff)
+    {
+        float raw_speed = 0.05f + 0.03f * rarity;
+        float raw_dmg = 0.05f + 0.045f * rarity;
+        float speed_pct = (raw_speed > 0.35f ? 0.35f : raw_speed) * 100;
+        float dmg_pct = (raw_dmg > 0.50f ? 0.50f : raw_dmg) * 100;
+        char *speed_buf = malloc(16);
+        char *dmg_buf = malloc(16);
+        sprintf(speed_buf, "+%.0f%%", speed_pct);
+        sprintf(dmg_buf, "+%.0f%%", dmg_pct);
+        rr_ui_container_add_element(
+            this, rr_ui_set_justify(rr_ui_h_container_init(
+                                        rr_ui_container_init(), 0, 0,
+                                        rr_ui_text_init("BuffSpeed: ", 12, 0xff61faed),
+                                        rr_ui_text_init(speed_buf, 12, 0xffffffff), NULL),
+                                    -1, 0));
+        rr_ui_container_add_element(
+            this, rr_ui_set_justify(rr_ui_h_container_init(
+                                        rr_ui_container_init(), 0, 0,
+                                        rr_ui_text_init("BuffDame: ", 12, 0xffcc0a11),
+                                        rr_ui_text_init(dmg_buf, 12, 0xffffffff), NULL),
+                                    -1, 0));
     }
     return this;
 }

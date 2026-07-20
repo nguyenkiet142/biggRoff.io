@@ -30,6 +30,8 @@
 #include <Shared/Utilities.h>
 #include <Client/DOM.h>
 
+#include <Client/Ui/InGame/LoadoutDrag.h>
+
 struct inventory_button_metadata
 {
     uint8_t id;
@@ -43,23 +45,36 @@ static void inventory_button_on_event(struct rr_ui_element *this,
     struct inventory_button_metadata *data = this->data;
     if (data->count == 0)
         return;
-    for (uint8_t i = 0; i < RR_MAX_SLOT_COUNT * 2; ++i)
-        if (i % RR_MAX_SLOT_COUNT < game->slots_unlocked &&
-            game->cache.loadout[i].id == 0)
-        {
-            if (game->input_data->mouse_buttons_up_this_tick & 1 &&
-                game->pressed == this)
+
+    if (game->input_data->mouse_buttons_down_this_tick & 1 &&
+        game->pressed == this && !game->drag_state.active)
+    {
+        float click_off_x = game->input_data->mouse_x - this->abs_x;
+        float click_off_y = game->input_data->mouse_y - this->abs_y;
+        rr_ui_drag_start_inventory(game, data->id, data->rarity,
+                                    click_off_x, click_off_y);
+        return;
+    }
+
+    if ((game->input_data->mouse_buttons_up_this_tick & 1) &&
+        game->pressed == this && !game->drag_state.active)
+    {
+        for (uint8_t i = 0; i < RR_MAX_SLOT_COUNT * 2; ++i)
+            if (i % RR_MAX_SLOT_COUNT < game->slots_unlocked &&
+                game->cache.loadout[i].id == 0)
             {
                 game->cache.loadout[i].id = data->id;
                 game->cache.loadout[i].rarity = data->rarity;
+                break;
             }
-            game->cursor = rr_game_cursor_pointer;
-            break;
-        }
-    rr_ui_set_tooltip_metadata(game->petal_tooltips[data->id][data->rarity],
-                               data->count, 255);
+    }
+
+    rr_ui_set_tooltip_metadata(
+        game->petal_tooltips[data->id][data->rarity],
+        data->count, 255);
     rr_ui_render_tooltip_above(
         this, game->petal_tooltips[data->id][data->rarity], game);
+    game->cursor = rr_game_cursor_pointer;
 }
 
 static uint8_t inventory_button_should_show(struct rr_ui_element *this,
@@ -95,12 +110,23 @@ static void inventory_button_on_render(struct rr_ui_element *this,
 {
     struct inventory_button_metadata *data = this->data;
     struct rr_renderer *renderer = game->renderer;
+
+    if (game->drag_state.active &&
+        game->drag_state.source_type == RR_DRAG_SOURCE_INVENTORY &&
+        game->drag_state.source_id == data->id &&
+        game->drag_state.source_rarity == data->rarity)
+    {
+        rr_renderer_set_global_alpha(renderer, 0.4f);
+    }
+
     rr_renderer_scale(renderer, renderer->scale * this->width / 60);
     struct rr_renderer_context_state state;
     rr_renderer_context_state_init(renderer, &state);
     rr_renderer_draw_background(renderer, data->rarity, 1);
     rr_renderer_draw_petal_with_name(renderer, data->id, data->rarity);
     rr_renderer_context_state_free(renderer, &state);
+
+    rr_renderer_set_global_alpha(renderer, 1.0f);
 }
 
 static void inventory_button_count_on_render(struct rr_ui_element *this,

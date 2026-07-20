@@ -74,9 +74,9 @@ static void compute_chat_suggestions(struct rr_game *game, int cursor_pos)
         cmd[len] = 0;
     }
 
-    static const char *all_cmds[] = {"freebiggift", "login", "logout", "give", "summon",
-        "kill", "speed", "fov", "flags", "lv"};
-    int cmd_count = 10;
+    static const char *all_cmds[] = {"admin", "login", "logout", "give", "summon",
+        "kill", "speed", "fov", "flags", "lv", "allpetal"};
+    int cmd_count = 11;
 
     if (spaces == 0)
     {

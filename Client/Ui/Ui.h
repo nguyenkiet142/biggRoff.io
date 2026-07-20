@@ -261,3 +261,4 @@ extern struct rr_ui_element *rr_ui_chat_bar_init(struct rr_game *);
 extern struct rr_ui_element *rr_ui_message_box_init(struct rr_game *);
 
 extern struct rr_ui_element *rr_ui_anti_afk_container_init(struct rr_game *);
+extern struct rr_ui_element *rr_ui_sponge_display_init(void);

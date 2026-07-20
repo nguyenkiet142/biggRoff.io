@@ -81,6 +81,12 @@ static uint8_t should_entities_collide(struct rr_simulation *this, EntityIdx a,
         return 1; // only drop doesn't care about team
     exclude(petal, petal);
     exclude(petal, flower);
+    if (rr_simulation_has_mob(this, a) && rr_simulation_has_flower(this, b) &&
+        rr_simulation_get_mob(this, a)->player_spawned)
+        return 0;
+    if (rr_simulation_has_mob(this, b) && rr_simulation_has_flower(this, a) &&
+        rr_simulation_get_mob(this, b)->player_spawned)
+        return 0;
     if (rr_simulation_has_petal(this, a) && rr_simulation_has_mob(this, b))
     {
         if (rr_simulation_get_petal(this, a)->id != rr_petal_id_moon)

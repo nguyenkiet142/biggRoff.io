@@ -139,6 +139,14 @@ EntityIdx rr_simulation_alloc_petal(struct rr_simulation *this, EntityIdx arena,
         rr_component_physical_set_radius(physical, 15);
     else if (id == rr_petal_id_fangs)
         rr_component_physical_set_radius(physical, 10);
+    else if (id == rr_petal_id_sponge)
+        rr_component_physical_set_radius(physical, 12);
+    else if (id == rr_petal_id_cotton)
+        rr_component_physical_set_radius(physical, 12);
+    else if (id == rr_petal_id_missle)
+        rr_component_physical_set_radius(physical, 13);
+    else if (id == rr_petal_id_staff)
+        rr_component_physical_set_radius(physical, 20);    
 
     rr_component_petal_set_id(petal, id);
     rr_component_petal_set_rarity(petal, rarity);
