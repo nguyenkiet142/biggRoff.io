@@ -34,9 +34,11 @@ struct lws;
 struct rr_server;
 struct rr_squad_member;
 
+#define RR_SIMULATION_COUNT 2
+
 struct rr_server
 {
-    struct rr_simulation simulation;
+    struct rr_simulation simulations[RR_SIMULATION_COUNT];
     uint8_t clients_in_use[RR_BITSET_ROUND(RR_MAX_CLIENT_COUNT)];
     struct rr_server_client clients[RR_MAX_CLIENT_COUNT];
     struct lws_context *server;
@@ -50,8 +52,8 @@ struct rr_server
 void rr_server_init(struct rr_server *);
 void rr_server_free(struct rr_server *);
 
-uint8_t rr_client_create_squad(struct rr_server *, struct rr_server_client *);
-uint8_t rr_client_find_squad(struct rr_server *, struct rr_server_client *);
+uint8_t rr_client_create_squad(struct rr_server *, struct rr_server_client *, uint8_t biome);
+uint8_t rr_client_find_squad(struct rr_server *, struct rr_server_client *, uint8_t biome);
 uint8_t rr_client_join_squad_with_code(struct rr_server *,
                                        struct rr_server_client *, char *);
 uint8_t rr_client_join_squad(struct rr_server *, struct rr_server_client *,

@@ -82,6 +82,7 @@ struct rr_server_client
     char blocked_clients[RR_MAX_CLIENT_COUNT][37];
     uint8_t squad_pos;
     uint8_t squad;
+    uint8_t simulation_index;
     uint8_t checkpoint;
     uint8_t received_first_packet : 1;
     uint8_t verified : 1;

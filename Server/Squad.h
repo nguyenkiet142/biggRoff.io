@@ -36,6 +36,7 @@ struct rr_squad
     uint8_t owner;
     uint8_t private;
     uint8_t expose_code;
+    uint8_t biome;
     char squad_code[7];
 };
 
@@ -45,3 +46,6 @@ uint8_t rr_squad_has_space(struct rr_squad *);
 
 void rr_squad_add_client(struct rr_squad *, struct rr_server_client *);
 void rr_squad_remove_client(struct rr_squad *, struct rr_server_client *);
+
+uint8_t rr_client_create_squad(struct rr_server *, struct rr_server_client *, uint8_t biome);
+uint8_t rr_client_find_squad(struct rr_server *, struct rr_server_client *, uint8_t biome);

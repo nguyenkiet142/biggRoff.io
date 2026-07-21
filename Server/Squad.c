@@ -107,11 +107,13 @@ void rr_client_can_rejoin_squads(struct rr_server *this,
 }
 
 uint8_t rr_client_find_squad(struct rr_server *this,
-                             struct rr_server_client *member)
+                             struct rr_server_client *member,
+                             uint8_t biome)
 {
     for (uint8_t i = 0; i < RR_SQUAD_COUNT; ++i)
         if (rr_squad_has_space(&this->squads[i]) && !this->squads[i].private &&
-            !rr_bitset_get(member->joined_squad_before, i))
+            !rr_bitset_get(member->joined_squad_before, i) &&
+            this->squads[i].biome == biome)
         {
             rr_client_can_rejoin_squads(this, member, i);
             return i;
@@ -120,7 +122,8 @@ uint8_t rr_client_find_squad(struct rr_server *this,
 }
 
 uint8_t rr_client_create_squad(struct rr_server *this,
-                               struct rr_server_client *member)
+                               struct rr_server_client *member,
+                               uint8_t biome)
 {
     for (uint8_t i = 0; i < RR_SQUAD_COUNT; ++i)
         if (this->squads[i].member_count == 0)
@@ -128,6 +131,7 @@ uint8_t rr_client_create_squad(struct rr_server *this,
             this->squads[i].private = 1;
             this->squads[i].expose_code = 0;
             this->squads[i].owner = 0;
+            this->squads[i].biome = biome;
             for (uint32_t j = 0; j < RR_MAX_CLIENT_COUNT; ++j)
                 rr_bitset_unset(this->clients[j].joined_squad_before, i);
             return i;
@@ -159,6 +163,7 @@ uint8_t rr_client_join_squad(struct rr_server *this,
         return 0;
     rr_squad_add_client(&this->squads[pos], member);
     member->squad = pos;
+    member->simulation_index = this->squads[pos].biome;
     member->in_squad = 1;
     if (!this->squads[pos].private)
         rr_bitset_set(member->joined_squad_before, pos);
@@ -172,6 +177,7 @@ void rr_client_leave_squad(struct rr_server *this,
         return;
     rr_squad_remove_client(&this->squads[member->squad], member);
     member->squad = 0;
+    member->simulation_index = 0;
     member->in_squad = 0;
 }
 

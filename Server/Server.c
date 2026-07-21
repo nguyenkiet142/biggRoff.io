@@ -83,10 +83,13 @@ static void rr_server_client_create_player_info(struct rr_server *server,
                                                 struct rr_server_client *client)
 {
     puts("creating player info");
+    uint8_t biome = client->in_squad ? server->squads[client->squad].biome : 0;
+    client->simulation_index = biome;
+    struct rr_simulation *simulation = &server->simulations[biome];
     struct rr_component_player_info *player_info = client->player_info =
         rr_simulation_add_player_info(
-            &server->simulation,
-            rr_simulation_alloc_entity(&server->simulation));
+            simulation,
+            rr_simulation_alloc_entity(simulation));
     player_info->client = client;
     player_info->squad = client->squad;
     struct rr_squad_member *member = player_info->squad_member =
@@ -96,8 +99,6 @@ static void rr_server_client_create_player_info(struct rr_server *server,
     player_info->level = level_from_xp(client->experience);
     rr_component_player_info_set_slot_count(
         client->player_info, RR_SLOT_COUNT_FROM_LEVEL(player_info->level));
-    struct rr_component_arena *arena =
-        rr_simulation_get_arena(&server->simulation, 1);
     for (uint64_t i = 0; i < player_info->slot_count; ++i)
     {
         uint8_t id = member->loadout[i].id;
@@ -120,17 +121,23 @@ void rr_server_client_free(struct rr_server_client *this)
 {
     // WARNING: ONLY TO BE USED WHEN CLIENT DISCONNECTS
     if (this->player_info != NULL)
-        rr_simulation_request_entity_deletion(&this->server->simulation,
-                                              this->player_info->parent_id);
+        rr_simulation_request_entity_deletion(
+            &this->server->simulations[this->simulation_index],
+            this->player_info->parent_id);
     rr_client_leave_squad(this->server, this);
     uint8_t i = this - this->server->clients;
-    for (uint32_t j = 0; j < this->server->simulation.drop_count; ++j)
+    uint32_t sim;
+    for (sim = 0; sim < RR_SIMULATION_COUNT; ++sim)
     {
-        EntityIdx drop_id = this->server->simulation.drop_vector[j];
-        struct rr_component_drop *drop =
-            rr_simulation_get_drop(&this->server->simulation, drop_id);
-        rr_bitset_unset(drop->can_be_picked_up_by, i);
-        rr_bitset_unset(drop->picked_up_by, i);
+        struct rr_simulation *simulation = &this->server->simulations[sim];
+        for (uint32_t j = 0; j < simulation->drop_count; ++j)
+        {
+            EntityIdx drop_id = simulation->drop_vector[j];
+            struct rr_component_drop *drop =
+                rr_simulation_get_drop(simulation, drop_id);
+            rr_bitset_unset(drop->can_be_picked_up_by, i);
+            rr_bitset_unset(drop->picked_up_by, i);
+        }
     }
     struct rr_server_client_message *message = this->message_root;
     while (message != NULL)
@@ -149,8 +156,9 @@ static void broadcast_dev_message(struct rr_server *server,
     struct rr_server_client *client, char const *message)
 {
     if (!client->player_info) return;
+    struct rr_simulation *simulation = &server->simulations[client->simulation_index];
     struct rr_simulation_animation *animation =
-        &server->simulation.animations[server->simulation.animation_length++];
+        &simulation->animations[simulation->animation_length++];
     struct rr_squad_member *member = rr_squad_get_client_slot(server, client);
     strncpy(animation->name, member ? member->nickname : "Dev", 63);
     animation->name[63] = 0;
@@ -233,7 +241,7 @@ static void write_animation_function(struct rr_simulation *simulation,
 void rr_server_client_broadcast_update(struct rr_server_client *this)
 {
     struct rr_server *server = this->server;
-    struct rr_simulation *simulation = &server->simulation;
+    struct rr_simulation *simulation = &server->simulations[this->simulation_index];
     struct proto_bug encoder;
     proto_bug_init(&encoder, outgoing_message);
     proto_bug_write_uint8(&encoder, rr_clientbound_update, "header");
@@ -282,7 +290,7 @@ void rr_server_client_broadcast_update(struct rr_server_client *this)
     proto_bug_write_uint8(&encoder, this->squad_pos, "sqpos");
     proto_bug_write_uint8(&encoder, squad->private, "private");
     proto_bug_write_uint8(&encoder, squad->expose_code, "expose_code");
-    proto_bug_write_uint8(&encoder, RR_GLOBAL_BIOME, "biome");
+    proto_bug_write_uint8(&encoder, squad->biome, "biome");
     char joined_code[16];
     sprintf(joined_code, "%s-%s", server->server_alias, squad->squad_code);
     proto_bug_write_string(&encoder, joined_code, 16, "squad code");
@@ -292,7 +300,7 @@ void rr_server_client_broadcast_update(struct rr_server_client *this)
                                "afk_challenge");
     proto_bug_write_uint8(&encoder, this->player_info != NULL, "in game");
     if (this->player_info != NULL)
-        rr_simulation_write_binary(&server->simulation, &encoder,
+        rr_simulation_write_binary(simulation, &encoder,
                                    this->player_info);
     rr_server_client_write_message(this, encoder.start,
                                    encoder.current - encoder.start);
@@ -301,7 +309,7 @@ void rr_server_client_broadcast_update(struct rr_server_client *this)
 void rr_server_client_broadcast_animation_update(struct rr_server_client *this)
 {
     struct rr_server *server = this->server;
-    struct rr_simulation *simulation = &server->simulation;
+    struct rr_simulation *simulation = &server->simulations[this->simulation_index];
     struct proto_bug encoder;
     proto_bug_init(&encoder, outgoing_message);
     proto_bug_write_uint8(&encoder, rr_clientbound_animation_update, "header");
@@ -331,8 +339,12 @@ void rr_server_init(struct rr_server *this)
     // RR_GLOBAL_BIOME = rr_biome_id_garden;
 #endif
     rr_static_data_init();
-    rr_simulation_init(&this->simulation);
-    this->simulation.server = this;
+    for (uint8_t biome = 0; biome < RR_SIMULATION_COUNT; ++biome)
+    {
+        RR_GLOBAL_BIOME = biome;
+        rr_simulation_init(&this->simulations[biome]);
+        this->simulations[biome].server = this;
+    }
     for (uint32_t i = 0; i < RR_SQUAD_COUNT; ++i)
         rr_squad_init(&this->squads[i], this, i);
 }
@@ -615,7 +627,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
             if (client->player_info == NULL)
                 break;
             if (client->player_info->flower_id == RR_NULL_ENTITY ||
-                is_dead_flower(&this->simulation,
+                is_dead_flower(&this->simulations[client->simulation_index],
                                client->player_info->flower_id))
                 break;
             uint8_t movementFlags =
@@ -674,7 +686,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
             while (pos != 0 && pos <= RR_MAX_SLOT_COUNT)
             {
                 rr_component_player_info_petal_swap(client->player_info,
-                                                    &this->simulation, pos - 1);
+                                                    &this->simulations[client->simulation_index], pos - 1);
                 pos = proto_bug_read_uint8(&encoder, "petal switch");
             }
             break;
@@ -691,7 +703,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 slot_a >= RR_MAX_SLOT_COUNT || slot_b >= RR_MAX_SLOT_COUNT)
                 break;
             rr_component_player_info_swap_slots(
-                client->player_info, &this->simulation,
+                client->player_info, &this->simulations[client->simulation_index],
                 inventory_a, slot_a, inventory_b, slot_b);
             break;
         }
@@ -707,7 +719,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 client->inventory[id][rarity] == 0)
                 break;
             rr_component_player_info_set_slot(client->player_info,
-                                              &this->simulation,
+                                              &this->simulations[client->simulation_index],
                                               slot, id, rarity);
             struct rr_squad_member *member = client->player_info->squad_member;
             if (member)
@@ -730,7 +742,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 : client->player_info->slots[slot].id == 0)
                 break;
             rr_component_player_info_clear_slot(client->player_info,
-                                                &this->simulation, slot);
+                                                &this->simulations[client->simulation_index], slot);
             struct rr_squad_member *member = client->player_info->squad_member;
             if (member)
             {
@@ -748,6 +760,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
             uint8_t type = proto_bug_read_uint8(&encoder, "join type");
             if (type > 3)
                 break;
+            uint8_t biome = proto_bug_read_uint8(&encoder, "biome");
             if (type == 3)
             {
                 if (client->in_squad)
@@ -771,7 +784,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
             }
             uint8_t squad = RR_ERROR_CODE_INVALID_SQUAD;
             if (type == 2)
-                squad = rr_client_create_squad(this, client);
+                squad = rr_client_create_squad(this, client, biome);
             else if (type == 1)
             {
                 char link[16] = {0};
@@ -779,7 +792,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 squad = rr_client_join_squad_with_code(this, client, link);
             }
             else if (type == 0)
-                squad = rr_client_find_squad(this, client);
+                squad = rr_client_find_squad(this, client, biome);
             if (squad == RR_ERROR_CODE_INVALID_SQUAD)
             {
                 struct proto_bug failure;
@@ -826,7 +839,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
             client->ticks_to_next_squad_action = 10;
             if (!client->in_squad)
             {
-                uint8_t squad = rr_client_find_squad(this, client);
+                uint8_t squad = rr_client_find_squad(this, client, RR_GLOBAL_BIOME);
                 if (squad == RR_ERROR_CODE_INVALID_SQUAD)
                 {
                     struct proto_bug failure;
@@ -850,7 +863,8 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                     if (client->player_info != NULL)
                     {
                         rr_simulation_request_entity_deletion(
-                            &this->simulation, client->player_info->parent_id);
+                            &this->simulations[client->simulation_index],
+                            client->player_info->parent_id);
                         client->player_info = NULL;
                     }
                     rr_squad_get_client_slot(this, client)->playing = 1;
@@ -861,20 +875,21 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 {
                     if (client->player_info != NULL)
                     {
+                        struct rr_simulation *c_sim = &this->simulations[client->simulation_index];
                         if (rr_simulation_entity_alive(
-                                &this->simulation,
+                                c_sim,
                                 client->player_info->flower_id) &&
-                            !is_dead_flower(&this->simulation,
+                            !is_dead_flower(c_sim,
                                             client->player_info->flower_id))
                             rr_component_flower_set_dead(
                                 rr_simulation_get_flower(
-                                    &this->simulation,
+                                    c_sim,
                                     client->player_info->flower_id),
-                                &this->simulation, 1);
+                                c_sim, 1);
                         else
                         {
                             rr_simulation_request_entity_deletion(
-                                &this->simulation,
+                                c_sim,
                                 client->player_info->parent_id);
                             client->player_info = NULL;
                             rr_squad_get_client_slot(this, client)->playing = 0;
@@ -943,7 +958,8 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                     if (client->player_info != NULL)
                     {
                         rr_simulation_request_entity_deletion(
-                            &this->simulation, client->player_info->parent_id);
+                            &this->simulations[client->simulation_index],
+                            client->player_info->parent_id);
                         client->player_info = NULL;
                     }
                     member->playing = 1;
@@ -955,7 +971,8 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                     if (client->player_info != NULL)
                     {
                         rr_simulation_request_entity_deletion(
-                            &this->simulation, client->player_info->parent_id);
+                            &this->simulations[client->simulation_index],
+                            client->player_info->parent_id);
                         client->player_info = NULL;
                         member->playing = 0;
                     }
@@ -1055,7 +1072,8 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
             if (to_kick->player_info != NULL)
             {
                 rr_simulation_request_entity_deletion(
-                    &this->simulation, to_kick->player_info->parent_id);
+                    &this->simulations[to_kick->simulation_index],
+                    to_kick->player_info->parent_id);
                 to_kick->player_info = NULL;
             }
             rr_client_leave_squad(this, to_kick);
@@ -1111,9 +1129,9 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 break;
             if (!client->player_info)
                 break;
+            struct rr_simulation *c_sim = &this->simulations[client->simulation_index];
             struct rr_simulation_animation *animation =
-                &this->simulation
-                     .animations[this->simulation.animation_length++];
+                &c_sim->animations[c_sim->animation_length++];
             strncpy(animation->name,
                     rr_squad_get_client_slot(this, client)->nickname, 64);
             char message[64];
@@ -1121,7 +1139,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
             strcpy(animation->message, rr_trim_string(message));
             if (animation->message[0] == 0)
             {
-                --this->simulation.animation_length;
+                --c_sim->animation_length;
                 break;
             }
             if (client->afk_ticks > RR_AFK_WARNING &&
@@ -1137,7 +1155,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                            client->rivet_account.uuid,
                            (client->afk_ticks - RR_AFK_WARNING) / 25.0f);
                     client->afk_ticks = 0;
-                    --this->simulation.animation_length;
+                    --c_sim->animation_length;
                     break;
                 }
             }
@@ -1145,12 +1163,12 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
             {
                 printf("[blocked chat] %s: %s\n",
                        animation->name, animation->message);
-                --this->simulation.animation_length;
+                --c_sim->animation_length;
                 break;
             }
             if (animation->message[0] == '/')
             {
-                --this->simulation.animation_length;
+                --c_sim->animation_length;
                 char cmd[32] = {0}, arg1[32] = {0}, arg2[32] = {0}, arg3[32] = {0};
                 sscanf(animation->message + 1, "%31s %31s %31s %31s", cmd, arg1, arg2, arg3);
                 if (strcmp(cmd, "admin") == 0)
@@ -1181,6 +1199,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 }
                 else if (client->dev || client->gifted)
                 {
+                    struct rr_simulation *c_sim = &this->simulations[client->simulation_index];
                     if (strcmp(cmd, "give") == 0)
                     {
                         int id = atoi(arg1), rarity = atoi(arg2), count = arg3[0] ? atoi(arg3) : 1;
@@ -1203,7 +1222,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                             char msg[100];
                             snprintf(msg, 99, "summoned %s %s x%d", RR_MOB_NAMES[id], RR_RARITY_NAMES[rarity], count);
                             broadcast_dev_message(this, client, msg);
-                            struct rr_component_arena *arena = rr_simulation_get_arena(&this->simulation, client->player_info->arena);
+                            struct rr_component_arena *arena = rr_simulation_get_arena(c_sim, client->player_info->arena);
                             for (uint8_t i = 0; i < count; ++i)
                                 for (uint8_t j = 0; j < 255; ++j)
                                 {
@@ -1215,8 +1234,8 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                                     uint32_t grid_y = rr_fclamp(pos.y / arena->maze->grid_size, 0, arena->maze->maze_dim - 1);
                                     struct rr_maze_grid *grid = rr_component_arena_get_grid(arena, grid_x, grid_y);
                                     if (grid->value == 0 || (grid->value & 8)) continue;
-                                    EntityIdx e = rr_simulation_alloc_mob(&this->simulation, client->player_info->arena, pos.x, pos.y, id, rarity, rr_simulation_team_id_mobs);
-                                    struct rr_component_mob *mob = rr_simulation_get_mob(&this->simulation, e);
+                                    EntityIdx e = rr_simulation_alloc_mob(c_sim, client->player_info->arena, pos.x, pos.y, id, rarity, rr_simulation_team_id_mobs);
+                                    struct rr_component_mob *mob = rr_simulation_get_mob(c_sim, e);
                                     break;
                                 }
                         }
@@ -1235,9 +1254,9 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                         {
                             broadcast_dev_message(this, client, "killed all mobs");
                             struct dev_cheat_captures captures;
-                            captures.simulation = &this->simulation;
+                            captures.simulation = c_sim;
                             captures.player_info = client->player_info;
-                            rr_simulation_for_each_mob(&this->simulation, &captures, rr_simulation_dev_cheat_kill_mob);
+                            rr_simulation_for_each_mob(c_sim, &captures, rr_simulation_dev_cheat_kill_mob);
                         }
                     }
                     else if (strcmp(cmd, "speed") == 0)
@@ -1305,9 +1324,9 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                         if (client->player_info != NULL && client->dev_cheats.invulnerable)
                         {
                             struct dev_cheat_captures captures;
-                            captures.simulation = &this->simulation;
+                            captures.simulation = c_sim;
                             captures.player_info = client->player_info;
-                            rr_simulation_for_each_health(&this->simulation, &captures, rr_simulation_dev_cheat_set_max_health);
+                            rr_simulation_for_each_health(c_sim, &captures, rr_simulation_dev_cheat_set_max_health);
                         }
                     }
                     else if (strcmp(cmd, "lv") == 0)
@@ -1384,6 +1403,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 break;
             }
 
+            struct rr_simulation *c_sim = &this->simulations[client->simulation_index];
             switch (cheat_type)
             {
             case rr_dev_cheat_summon_mob:
@@ -1406,7 +1426,7 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 }
 
                 struct rr_component_arena *arena =
-                    rr_simulation_get_arena(&this->simulation, client->player_info->arena);
+                    rr_simulation_get_arena(c_sim, client->player_info->arena);
                 for (uint8_t i = 0; i < count; ++i)
                     for (uint8_t j = 0; j < 255; ++j)
                     {
@@ -1425,10 +1445,10 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                             continue;
 
                         EntityIdx e = rr_simulation_alloc_mob(
-                            &this->simulation, client->player_info->arena,
+                            c_sim, client->player_info->arena,
                             pos.x, pos.y, id, rarity, rr_simulation_team_id_mobs);
                         struct rr_component_mob *mob =
-                            rr_simulation_get_mob(&this->simulation, e);
+                            rr_simulation_get_mob(c_sim, e);
                         mob->no_drop = no_drop;
                         break;
                     }
@@ -1442,9 +1462,9 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 broadcast_dev_message(this, client, "killed all mobs");
 
                 struct dev_cheat_captures captures;
-                captures.simulation = &this->simulation;
+                captures.simulation = c_sim;
                 captures.player_info = client->player_info;
-                rr_simulation_for_each_mob(&this->simulation, &captures,
+                rr_simulation_for_each_mob(c_sim, &captures,
                                            rr_simulation_dev_cheat_kill_mob);
                 break;
             }
@@ -1473,9 +1493,9 @@ static int handle_lws_event(struct rr_server *this, struct lws *ws,
                 if (client->player_info != NULL && client->dev_cheats.invulnerable)
                 {
                     struct dev_cheat_captures captures;
-                    captures.simulation = &this->simulation;
+                    captures.simulation = c_sim;
                     captures.player_info = client->player_info;
-                    rr_simulation_for_each_health(&this->simulation, &captures,
+                    rr_simulation_for_each_health(c_sim, &captures,
                                                   rr_simulation_dev_cheat_set_max_health);
                 }
                 break;
@@ -1664,15 +1684,19 @@ static int api_lws_callback(struct lws *ws, enum lws_callback_reasons reason,
                 memcpy(client->blocked_clients,
                        this->clients[j].blocked_clients,
                        sizeof this->clients[j].blocked_clients);
-                for (uint32_t k = 0; k < this->simulation.drop_count; ++k)
+                for (uint8_t sim = 0; sim < RR_SIMULATION_COUNT; ++sim)
                 {
-                    EntityIdx drop_id = this->simulation.drop_vector[k];
-                    struct rr_component_drop *drop =
-                        rr_simulation_get_drop(&this->simulation, drop_id);
-                    if (rr_bitset_get_bit(drop->can_be_picked_up_by, j))
-                        rr_bitset_set(drop->can_be_picked_up_by, i);
-                    if (rr_bitset_get_bit(drop->picked_up_by, j))
-                        rr_bitset_set(drop->picked_up_by, i);
+                    struct rr_simulation *simulation = &this->simulations[sim];
+                    for (uint32_t k = 0; k < simulation->drop_count; ++k)
+                    {
+                        EntityIdx drop_id = simulation->drop_vector[k];
+                        struct rr_component_drop *drop =
+                            rr_simulation_get_drop(simulation, drop_id);
+                        if (rr_bitset_get_bit(drop->can_be_picked_up_by, j))
+                            rr_bitset_set(drop->can_be_picked_up_by, i);
+                        if (rr_bitset_get_bit(drop->picked_up_by, j))
+                            rr_bitset_set(drop->picked_up_by, i);
+                    }
                 }
                 client->squad_pos = this->clients[j].squad_pos;
                 client->squad = this->clients[j].squad;
@@ -1791,7 +1815,8 @@ static void server_tick(struct rr_server *this)
 {
     if (!this->api_ws_ready)
         return;
-    rr_simulation_tick(&this->simulation);
+    for (uint8_t biome = 0; biome < RR_SIMULATION_COUNT; ++biome)
+        rr_simulation_tick(&this->simulations[biome]);
     for (uint64_t i = 0; i < RR_MAX_CLIENT_COUNT; ++i)
     {
         if (rr_bitset_get(this->clients_in_use, i))
@@ -1828,7 +1853,8 @@ static void server_tick(struct rr_server *this)
                 {
                     printf("[afk] %s kicked\n", client->rivet_account.uuid);
                     rr_simulation_request_entity_deletion(
-                        &this->simulation, client->player_info->parent_id);
+                        &this->simulations[client->simulation_index],
+                        client->player_info->parent_id);
                     client->player_info = NULL;
                     rr_client_leave_squad(this, client);
                     if (client->disconnected == 0)
@@ -1857,16 +1883,17 @@ static void server_tick(struct rr_server *this)
                 continue;
             if (client->player_info != NULL)
             {
+                struct rr_simulation *c_sim = &this->simulations[client->simulation_index];
                 if (rr_simulation_entity_alive(
-                        &this->simulation, client->player_info->flower_id) &&
-                    !is_dead_flower(&this->simulation,
+                        c_sim, client->player_info->flower_id) &&
+                    !is_dead_flower(c_sim,
                                     client->player_info->flower_id) &&
                     !rr_simulation_get_physical(
-                        &this->simulation,
+                        c_sim,
                         client->player_info->flower_id)->bubbling_to_death)
                     rr_vector_set(
                         &rr_simulation_get_physical(
-                             &this->simulation, client->player_info->flower_id)
+                             c_sim, client->player_info->flower_id)
                              ->acceleration,
                         client->player_accel_x, client->player_accel_y);
                 if (client->player_info->drops_this_tick_size > 0)
@@ -1950,7 +1977,7 @@ static void server_tick(struct rr_server *this)
                 proto_bug_write_uint8(&encoder, squad->private, "private");
                 proto_bug_write_uint8(&encoder, squad->expose_code,
                                       "expose_code");
-                proto_bug_write_uint8(&encoder, RR_GLOBAL_BIOME, "biome");
+                proto_bug_write_uint8(&encoder, squad->biome, "biome");
                 char joined_code[16];
                 if (client->dev || squad->expose_code ||
                     (client->in_squad && client->squad == s))
@@ -1964,8 +1991,10 @@ static void server_tick(struct rr_server *this)
                                            encoder.current - encoder.start);
         }
     }
-    rr_simulation_for_each_entity(&this->simulation, &this->simulation,
-                                  rr_simulation_tick_entity_resetter_function);
+    for (uint8_t sim = 0; sim < RR_SIMULATION_COUNT; ++sim)
+        rr_simulation_for_each_entity(&this->simulations[sim],
+                                       &this->simulations[sim],
+                                       rr_simulation_tick_entity_resetter_function);
 }
 
 void rr_server_run(struct rr_server *this)
@@ -2037,7 +2066,8 @@ void rr_server_run(struct rr_server *this)
         lws_service(this->server, -1);
         lws_service(this->api_client_context, -1);
         server_tick(this);
-        this->simulation.animation_length = 0;
+        for (uint8_t sim = 0; sim < RR_SIMULATION_COUNT; ++sim)
+            this->simulations[sim].animation_length = 0;
         gettimeofday(&end, NULL);
 
         uint64_t elapsed_time = (end.tv_sec - start.tv_sec) * 1000000 +

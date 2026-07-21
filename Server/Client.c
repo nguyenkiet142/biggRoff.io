@@ -54,7 +54,7 @@ void rr_server_client_create_flower(struct rr_server_client *this)
         return;
     if (this->player_info->flower_id != RR_NULL_ENTITY)
         return;
-    struct rr_simulation *simulation = &this->server->simulation;
+    struct rr_simulation *simulation = &this->server->simulations[this->simulation_index];
     EntityIdx p =
         rr_simulation_alloc_player(simulation, 1, this->player_info->parent_id);
     uint32_t spawn_zone =
@@ -63,7 +63,8 @@ void rr_server_client_create_flower(struct rr_server_client *this)
         rr_simulation_get_physical(simulation, p);
     struct rr_component_arena *arena =
         rr_simulation_get_arena(simulation, physical->arena);
-    struct rr_maze_declaration *decl = &RR_MAZES[RR_GLOBAL_BIOME];
+    uint8_t biome = this->in_squad ? this->server->squads[this->squad].biome : RR_GLOBAL_BIOME;
+    struct rr_maze_declaration *decl = &RR_MAZES[biome];
     rr_component_physical_set_x(
         physical,
         2 * decl->grid_size * (decl->checkpoints[this->checkpoint].spawn_x +
@@ -227,10 +228,10 @@ void rr_server_client_craft_petal(struct rr_server_client *this,
         if (this->player_info->flower_id != RR_NULL_ENTITY)
         {
             rr_component_flower_set_level(
-                rr_simulation_get_flower(&server->simulation,
-                                         this->player_info->flower_id), level);
+        rr_simulation_get_flower(&server->simulations[this->simulation_index],
+                                 this->player_info->flower_id), level);
             struct rr_component_health *health =
-                rr_simulation_get_health(&server->simulation,
+                rr_simulation_get_health(&server->simulations[this->simulation_index],
                                          this->player_info->flower_id);
             rr_component_health_set_max_health(health,
                                                200 * pow(1.0256, level - 1));
@@ -270,7 +271,7 @@ int rr_server_client_read_from_api(struct rr_server_client *this,
     this->checkpoint = rr_binary_encoder_read_uint8(encoder);
     if (this->checkpoint >=
         rr_simulation_get_arena(
-            &this->server->simulation, 1)->maze->checkpoint_count)
+            &this->server->simulations[this->simulation_index], 1)->maze->checkpoint_count)
         this->checkpoint = 0;
     uint8_t id = rr_binary_encoder_read_uint8(encoder);
     while (id)

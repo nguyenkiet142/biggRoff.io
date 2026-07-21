@@ -675,6 +675,7 @@ static void join_code_on_event(struct rr_ui_element *this, struct rr_game *game)
             proto_bug_write_uint8(&encoder2, game->socket.quick_verification, "qv");
             proto_bug_write_uint8(&encoder2, rr_serverbound_squad_join, "header");
             proto_bug_write_uint8(&encoder2, 1, "join type");
+            proto_bug_write_uint8(&encoder2, 0, "biome");
             char *code = game->connect_code;
             while (*code != 0 && *code != '-')
                 ++code;
@@ -707,6 +708,7 @@ static void squad_join_button_on_event(struct rr_ui_element *this,
             proto_bug_write_uint8(&encoder2, rr_serverbound_squad_join,
                                   "header");
             proto_bug_write_uint8(&encoder2, 0, "join type");
+            proto_bug_write_uint8(&encoder2, 0, "biome");
 
             rr_websocket_send(&game->socket, encoder2.current - encoder2.start);
         }
@@ -731,6 +733,32 @@ static void squad_create_button_on_event(struct rr_ui_element *this,
             proto_bug_write_uint8(&encoder2, rr_serverbound_squad_join,
                                   "header");
             proto_bug_write_uint8(&encoder2, 2, "join type");
+            proto_bug_write_uint8(&encoder2, data->biome, "biome");
+
+            rr_websocket_send(&game->socket, encoder2.current - encoder2.start);
+        }
+        game->cursor = rr_game_cursor_pointer;
+        data->clickable = 1;
+    }
+    else
+        data->clickable = 0;
+}
+
+static void biome_squad_create_button_on_event(struct rr_ui_element *this,
+                                               struct rr_game *game)
+{
+    struct rr_ui_labeled_button_metadata *data = this->data;
+    if (game->socket_ready)
+    {
+        if (game->input_data->mouse_buttons_up_this_tick & 1)
+        {
+            struct proto_bug encoder2;
+            proto_bug_init(&encoder2, RR_OUTGOING_PACKET);
+            proto_bug_write_uint8(&encoder2, game->socket.quick_verification, "qv");
+            proto_bug_write_uint8(&encoder2, rr_serverbound_squad_join,
+                                  "header");
+            proto_bug_write_uint8(&encoder2, 2, "join type");
+            proto_bug_write_uint8(&encoder2, data->biome, "biome");
 
             rr_websocket_send(&game->socket, encoder2.current - encoder2.start);
         }
@@ -816,4 +844,17 @@ rr_ui_squad_toggle_buttons_container_init(struct rr_game *game)
         rr_ui_toggle_expose_code_button_init(game),
         NULL
     );
+}
+
+struct rr_ui_element *rr_ui_create_squad_biome_button_init(char *text,
+                                                           uint32_t fill,
+                                                           uint8_t biome)
+{
+    struct rr_ui_element *this =
+        rr_ui_labeled_button_init(text, 24, 0);
+    this->animate = ready_button_animate;
+    this->on_event = biome_squad_create_button_on_event;
+    rr_ui_set_background(this, fill);
+    ((struct rr_ui_labeled_button_metadata *)this->data)->biome = biome;
+    return this;
 }

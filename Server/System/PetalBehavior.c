@@ -672,7 +672,6 @@ static void petal_modifiers(struct rr_simulation *simulation,
     float magnet_diminish_factor = 1;
     float third_eye_diminish_factor = 1;
     float crest_diminish_factor = 1;
-    float staff_diminish_factor = 1;
     float to_rotate = 0.1;
     float fov_bonus = 0;
     uint8_t crest_count = 0;
@@ -687,6 +686,14 @@ static void petal_modifiers(struct rr_simulation *simulation,
         {
             max_sponge_rarity = player_info->slots[scan].rarity;
             active_sponge_slot_idx = scan;
+        }
+    uint64_t active_staff_slot_idx = UINT64_MAX;
+    for (uint64_t scan = 0; scan < player_info->slot_count; ++scan)
+        if (player_info->slots[scan].id == rr_petal_id_staff &&
+            (active_staff_slot_idx == UINT64_MAX ||
+             player_info->slots[scan].rarity > player_info->slots[active_staff_slot_idx].rarity))
+        {
+            active_staff_slot_idx = scan;
         }
     health->cotton_hash = RR_NULL_ENTITY;
     health->cotton_active = 0;
@@ -781,13 +788,14 @@ static void petal_modifiers(struct rr_simulation *simulation,
         }
         else if (data->id == rr_petal_id_staff)
         {
-            float raw_speed = 0.05f + 0.03f * slot->rarity;
-            float raw_dmg = 0.05f + 0.045f * slot->rarity;
-            float speed_buff = (raw_speed > 0.35f ? 0.35f : raw_speed) * staff_diminish_factor;
-            float dmg_buff = (raw_dmg > 0.50f ? 0.50f : raw_dmg) * staff_diminish_factor;
-            player_info->modifiers.staff_speed_mult += speed_buff;
-            player_info->modifiers.staff_damage_mult += dmg_buff;
-            staff_diminish_factor *= 0.5f;
+            if (active_staff_slot_idx != UINT64_MAX &&
+                outer == active_staff_slot_idx)
+            {
+                float raw_speed = 0.05f + 0.03f * slot->rarity;
+                float raw_dmg = 0.05f + 0.045f * slot->rarity;
+                player_info->modifiers.staff_speed_mult += raw_speed > 0.35f ? 0.35f : raw_speed;
+                player_info->modifiers.staff_damage_mult += raw_dmg > 0.50f ? 0.50f : raw_dmg;
+            }
         }
         else
         {

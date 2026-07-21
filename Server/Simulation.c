@@ -147,12 +147,12 @@ static struct zone zone_positions[ZONE_POSITION_COUNT] = {
     {26, 6,  3,  4, pter_edmo_zone},
 };
 
-static void set_spawn_zones()
+static void set_spawn_zones(uint8_t biome)
 {
     for (uint64_t i = 0; i < ZONE_POSITION_COUNT; i++)
     {
         struct zone zone = zone_positions[i];
-        set_special_zone(rr_biome_id_hell_creek, zone.spawn_func, zone.x, zone.y,
+        set_special_zone(biome, zone.spawn_func, zone.x, zone.y,
                          zone.w, zone.h);
     }
 }
@@ -165,7 +165,7 @@ void rr_simulation_init(struct rr_simulation *this)
     arena->biome = RR_GLOBAL_BIOME;
     rr_component_arena_spatial_hash_init(arena, this);
     set_respawn_zone(arena, SPAWN_ZONE_X, SPAWN_ZONE_Y);
-    set_spawn_zones();
+    set_spawn_zones(arena->biome);
 }
 
 struct too_close_captures
@@ -222,11 +222,11 @@ static void spawn_mob(struct rr_simulation *this, uint32_t grid_x,
     {
         id = grid->spawn_function();
         if (id == ALL_MOBS)
-            id = get_spawn_id(RR_GLOBAL_BIOME, grid);
+            id = get_spawn_id(arena->biome, grid);
         else if (id == DIFFICULT_MOBS)
             for (uint8_t i = 0; i < 10; ++i)
             {
-                id = get_spawn_id(RR_GLOBAL_BIOME, grid);
+                id = get_spawn_id(arena->biome, grid);
                 if (id != rr_mob_id_dakotaraptor &&
                     id != rr_mob_id_ornithomimus &&
                     id != rr_mob_id_triceratops &&
@@ -237,7 +237,7 @@ static void spawn_mob(struct rr_simulation *this, uint32_t grid_x,
             }
     }
     else
-        id = get_spawn_id(RR_GLOBAL_BIOME, grid);
+        id = get_spawn_id(arena->biome, grid);
     uint8_t rarity =
         get_spawn_rarity(grid->difficulty + grid->local_difficulty * 0);
     if (!should_spawn_at(id, rarity))

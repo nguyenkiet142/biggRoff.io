@@ -125,6 +125,7 @@ struct rr_game_squad
     uint8_t squad_pos;
     uint8_t squad_private;
     uint8_t squad_expose_code;
+    uint8_t squad_biome;
     char squad_code[16];
 };
 

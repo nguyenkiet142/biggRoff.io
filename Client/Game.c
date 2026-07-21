@@ -365,6 +365,7 @@ static void squad_leave_on_event(struct rr_ui_element *this,
             proto_bug_write_uint8(&encoder, game->socket.quick_verification, "qv");
             proto_bug_write_uint8(&encoder, rr_serverbound_squad_join, "header");
             proto_bug_write_uint8(&encoder, 3, "join type");
+            proto_bug_write_uint8(&encoder, 0, "biome");
             rr_websocket_send(&game->socket, encoder.current - encoder.start);
         }
         rr_ui_render_tooltip_below(this, game->leave_squad_tooltip, game);
@@ -488,17 +489,16 @@ void rr_game_init(struct rr_game *this)
                                 rr_ui_join_button_init(),
                                 NULL
                             ),
-                            /*
-                            rr_ui_h_container_init(rr_ui_container_init(), 0, 10,
-                                rr_ui_biome_button_init("Hell Creek", 0xffff0000, 0),
-                                rr_ui_biome_button_init("Ocean", 0xffcdb423, 1),
-                                NULL
-                            ),
-                            */
                             rr_ui_set_justify(
                                 rr_ui_h_container_init(rr_ui_container_init(), 0, 10, 
                                 rr_ui_create_squad_button_init(),
                                 rr_ui_squad_button_init(),
+                                NULL
+                            ), 1, -1),
+                            rr_ui_set_justify(
+                                rr_ui_h_container_init(rr_ui_container_init(), 0, 10,
+                                rr_ui_create_squad_biome_button_init("H", 0xff8B4513, 0),
+                                rr_ui_create_squad_biome_button_init("G", 0xff228B22, 1),
                                 NULL
                             ), 1, -1),
                             NULL
@@ -1116,7 +1116,7 @@ void rr_game_websocket_on_event_function(enum rr_websocket_event_type type,
                     proto_bug_read_uint8(&encoder, "private");
                 squad->squad_expose_code =
                     proto_bug_read_uint8(&encoder, "expose_code");
-                this->selected_biome = proto_bug_read_uint8(&encoder, "biome");
+                squad->squad_biome = proto_bug_read_uint8(&encoder, "biome");
                 proto_bug_read_string(&encoder, squad->squad_code, 16,
                                       "squad code");
             }
@@ -1850,6 +1850,7 @@ void rr_game_tick(struct rr_game *this, float delta)
             proto_bug_write_uint8(&encoder, this->socket.quick_verification, "qv");
             proto_bug_write_uint8(&encoder, rr_serverbound_squad_join, "header");
             proto_bug_write_uint8(&encoder, 3, "join type");
+            proto_bug_write_uint8(&encoder, 0, "biome");
             rr_websocket_send(&this->socket, encoder.current - encoder.start);
         }
     }

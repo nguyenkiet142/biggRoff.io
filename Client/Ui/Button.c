@@ -82,6 +82,7 @@ struct rr_ui_element *rr_ui_labeled_button_init(char *text, float height,
     struct rr_ui_labeled_button_metadata *data = malloc(sizeof *data);
     data->toggle = toggle;
     data->text = text;
+    data->biome = 0;
     this->data = data;
     this->abs_height = this->height = height;
     this->abs_width = this->width =
