@@ -731,8 +731,12 @@ static void petal_modifiers(struct rr_simulation *simulation,
         else if (data->id == rr_petal_id_crest)
         {
             ++crest_count;
-            fov_bonus += (1 / (1 - 0.1 * slot->rarity) - 1) *
-                             crest_diminish_factor;
+            float raw_bonus;
+            if (slot->rarity <= 6)
+                raw_bonus = (1 / (1 - 0.1 * slot->rarity) - 1);
+            else
+                raw_bonus = 2.333333f + (slot->rarity - 7) * 0.5f;
+            fov_bonus += raw_bonus * crest_diminish_factor;
             crest_diminish_factor *= 0.5;
         }
         else if (data->id == rr_petal_id_droplet)

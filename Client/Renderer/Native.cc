@@ -135,6 +135,11 @@ extern "C"
         cairo_new_path(self->context);
     }
 
+    void rr_renderer_close_path(struct rr_renderer *self)
+    {
+        cairo_close_path(self->context);
+    }
+
     void rr_renderer_move_to(struct rr_renderer *self, float x, float y)
     {
         cairo_move_to(self->context, x, y);

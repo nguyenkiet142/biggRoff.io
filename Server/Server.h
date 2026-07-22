@@ -34,7 +34,7 @@ struct lws;
 struct rr_server;
 struct rr_squad_member;
 
-#define RR_SIMULATION_COUNT 2
+#define RR_SIMULATION_COUNT 4
 
 struct rr_server
 {

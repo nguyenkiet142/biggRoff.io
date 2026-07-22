@@ -92,6 +92,7 @@ enum rr_biome_id
     rr_biome_id_hell_creek,
     rr_biome_id_garden,
     rr_biome_id_beehive,
+    rr_biome_id_ocean,
     rr_biome_id_max
 };
 
@@ -190,7 +191,13 @@ enum rr_mob_id
     rr_mob_id_lanternfly,         // 19
     rr_mob_id_sandstone,          // 20
 
-    rr_mob_id_max,                // 21
+    rr_mob_id_kelp,               // 21
+    rr_mob_id_king_mackarel,      // 22
+    rr_mob_id_seagull,            // 23
+    rr_mob_id_sea_snail,          // 24
+    rr_mob_id_pectinodon,         // 25
+
+    rr_mob_id_max,                // 26
 };
 
 struct rr_petal_base_stat_scale
@@ -260,6 +267,7 @@ extern double RR_MOB_WAVE_RARITY_COEFFICIENTS[rr_rarity_id_max + 1];
 extern uint32_t RR_MOB_DIFFICULTY_COEFFICIENTS[rr_mob_id_max];
 extern double RR_HELL_CREEK_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max];
 extern double RR_GARDEN_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max];
+extern double RR_OCEAN_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max];
 
 extern uint32_t RR_RARITY_COLORS[rr_rarity_id_max];
 extern char const *RR_RARITY_NAMES[rr_rarity_id_max];
@@ -311,6 +319,7 @@ struct rr_maze_declaration
 // RR_DECLARE_MAZE(HELL_CREEK, 54)
 RR_DECLARE_MAZE(HELL_CREEK, 80)
 RR_DECLARE_MAZE(BURROW, 4)
+RR_DECLARE_MAZE(GARDEN, 80)
 
 extern struct rr_maze_declaration RR_MAZES[rr_biome_id_max];
 
@@ -318,6 +327,8 @@ extern uint8_t RR_GLOBAL_BIOME;
 
 extern double RR_BASE_CRAFT_CHANCES[rr_rarity_id_max - 1];
 extern double RR_CRAFT_CHANCES[rr_rarity_id_max - 1];
+
+void build_custom_maze(uint8_t biome, struct rr_maze_grid *maze, uint32_t maze_dim);
 
 void rr_static_data_init();
 

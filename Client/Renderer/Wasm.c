@@ -219,6 +219,15 @@ void rr_renderer_begin_path(struct rr_renderer *this)
         rr_renderer_execute_instructions();
 }
 
+void rr_renderer_close_path(struct rr_renderer *this)
+{
+    update_if_transformed(this);
+    instruction_tape[instruction_size].type = 29;
+    instruction_tape[instruction_size].context_id = this->context_id;
+    if (++instruction_size == INSTRUCTION_QUEUE_MAX_SIZE)
+        rr_renderer_execute_instructions();
+}
+
 void rr_renderer_move_to(struct rr_renderer *this, float x, float y)
 {
     update_if_transformed(this);
@@ -632,6 +641,9 @@ void rr_renderer_execute_instructions()
                     str = UTF8ToString(char_arg);
                     Module.ctxs[ctx_id].strokeText(str, args[0], args[1]);
                     _free(char_arg);
+                    break;
+                case 29:
+                    Module.ctxs[ctx_id].closePath();
                     break;
                 case 30:
                     if (args[0] == 0)

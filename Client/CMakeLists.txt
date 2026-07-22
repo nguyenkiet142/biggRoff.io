@@ -25,6 +25,8 @@ set(SRCS
     Assets/MapFeature/Fern3.c
     Assets/MapFeature/Moss.c
     Assets/MapFeature/WaterLettuce.c
+    Assets/MapFeature/PalmTree.c
+    Assets/MapFeature/BeechTree.c
     Assets/Mob/Ankylosaurus.c
     Assets/Mob/Ant.c
     Assets/Mob/Beehive.c
@@ -45,9 +47,17 @@ set(SRCS
     Assets/Mob/Fern.c
     Assets/Mob/Meteor.c
     Assets/Mob/Tree.c
+    Assets/Mob/Kelp.c
+    Assets/Mob/KingMackarel.c
+    Assets/Mob/Seagull.c
+    Assets/Mob/SeaSnail.c
+    Assets/Mob/Pectinodon.c
     Assets/Tile/Garden.c
     Assets/Tile/HellCreek.c
     Assets/Tile/Ocean.c
+    Assets/Tile/CustomWall.c
+    Assets/Tile/GardenWall.c
+    Assets/Tile/HellCreekWall.c
     Assets/Init.c
     Assets/RenderMisc.c
     Assets/RenderMobs.c
@@ -133,6 +143,7 @@ set(SRCS
     ../Shared/Crypto.c
     ../Shared/pb.c
     # ../Shared/Rivet.c
+    ../Shared/BuildMaze.c
     ../Shared/SimulationCommon.c
     ../Shared/StaticData.c
     ../Shared/Utilities.c

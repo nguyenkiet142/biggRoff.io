@@ -41,8 +41,21 @@ uint32_t get_spawn_rarity(float difficulty)
 
 uint8_t get_spawn_id(uint8_t biome, struct rr_maze_grid *zone)
 {
-    double *table = biome == 0 ? RR_HELL_CREEK_MOB_ID_RARITY_COEFFICIENTS
-                               : RR_GARDEN_MOB_ID_RARITY_COEFFICIENTS;
+    double *table;
+    switch (biome)
+    {
+    case rr_biome_id_hell_creek:
+        table = RR_HELL_CREEK_MOB_ID_RARITY_COEFFICIENTS;
+        break;
+    case rr_biome_id_garden:
+        table = RR_GARDEN_MOB_ID_RARITY_COEFFICIENTS;
+        break;
+    default:
+        table = RR_OCEAN_MOB_ID_RARITY_COEFFICIENTS;
+        break;
+    }
+    if (table[rr_mob_id_max - 1] == 0)
+        return rr_mob_id_max;
     double seed = rr_frand();
     uint8_t id = 0;
     for (; id < rr_mob_id_max; ++id)

@@ -752,6 +752,7 @@ static void biome_squad_create_button_on_event(struct rr_ui_element *this,
     {
         if (game->input_data->mouse_buttons_up_this_tick & 1)
         {
+            game->selected_biome = data->biome;
             struct proto_bug encoder2;
             proto_bug_init(&encoder2, RR_OUTGOING_PACKET);
             proto_bug_write_uint8(&encoder2, game->socket.quick_verification, "qv");
@@ -846,13 +847,19 @@ rr_ui_squad_toggle_buttons_container_init(struct rr_game *game)
     );
 }
 
+static void biome_button_animate(struct rr_ui_element *this,
+                                 struct rr_game *game)
+{
+    rr_ui_default_animate(this, game);
+}
+
 struct rr_ui_element *rr_ui_create_squad_biome_button_init(char *text,
                                                            uint32_t fill,
                                                            uint8_t biome)
 {
     struct rr_ui_element *this =
-        rr_ui_labeled_button_init(text, 24, 0);
-    this->animate = ready_button_animate;
+        rr_ui_labeled_button_init(text, 36, 0);
+    this->animate = biome_button_animate;
     this->on_event = biome_squad_create_button_on_event;
     rr_ui_set_background(this, fill);
     ((struct rr_ui_labeled_button_metadata *)this->data)->biome = biome;

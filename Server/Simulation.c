@@ -149,9 +149,12 @@ static struct zone zone_positions[ZONE_POSITION_COUNT] = {
 
 static void set_spawn_zones(uint8_t biome)
 {
+    uint32_t dim = RR_MAZES[biome].maze_dim;
     for (uint64_t i = 0; i < ZONE_POSITION_COUNT; i++)
     {
         struct zone zone = zone_positions[i];
+        if ((zone.x + zone.w) * 2 > dim || (zone.y + zone.h) * 2 > dim)
+            continue;
         set_special_zone(biome, zone.spawn_func, zone.x, zone.y,
                          zone.w, zone.h);
     }
@@ -238,6 +241,8 @@ static void spawn_mob(struct rr_simulation *this, uint32_t grid_x,
     }
     else
         id = get_spawn_id(arena->biome, grid);
+    if (id >= rr_mob_id_max)
+        return;
     uint8_t rarity =
         get_spawn_rarity(grid->difficulty + grid->local_difficulty * 0);
     if (!should_spawn_at(id, rarity))

@@ -451,6 +451,80 @@ void rr_renderer_draw_mob(struct rr_renderer *renderer, uint8_t id,
         render_sprite(renderer, id, 2, flags);
         rr_renderer_context_state_free(renderer, &state);
         break;
+    case rr_mob_id_kelp:
+        rr_renderer_scale(renderer, 0.3f);
+        render_sprite(renderer, id, 0, flags);
+        break;
+    case rr_mob_id_king_mackarel:
+        rr_renderer_scale(renderer, 0.2f);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_rotate(renderer, animation_tick * 0.1f);
+        rr_renderer_translate(renderer, 0, 60);
+        render_sprite(renderer, id, 1, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_rotate(renderer, animation_tick * -0.1f);
+        rr_renderer_translate(renderer, 0, -60);
+        render_sprite(renderer, id, 2, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        render_sprite(renderer, id, 0, flags);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_translate(renderer, 180, 0);
+        render_sprite(renderer, id, 3, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_translate(renderer, -180, 0);
+        rr_renderer_rotate(renderer, turning_value);
+        render_sprite(renderer, id, 4, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        break;
+    case rr_mob_id_seagull:
+        rr_renderer_scale(renderer, 0.15f);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_rotate(renderer, animation_tick * 0.15f);
+        rr_renderer_translate(renderer, 0, 140);
+        render_sprite(renderer, id, 1, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_rotate(renderer, animation_tick * -0.15f);
+        rr_renderer_translate(renderer, 0, -140);
+        render_sprite(renderer, id, 2, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        render_sprite(renderer, id, 0, flags);
+        break;
+    case rr_mob_id_sea_snail:
+        rr_renderer_scale(renderer, 0.2f);
+        render_sprite(renderer, id, 0, flags);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_translate(renderer, 100, 0);
+        rr_renderer_rotate(renderer, turning_value);
+        render_sprite(renderer, id, 1, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        break;
+    case rr_mob_id_pectinodon:
+        rr_renderer_scale(renderer, 0.16f);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_rotate(renderer, animation_tick * 0.1f);
+        rr_renderer_translate(renderer, 0, 55);
+        render_sprite(renderer, id, 3, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_rotate(renderer, animation_tick * -0.1f);
+        rr_renderer_translate(renderer, 0, -55);
+        render_sprite(renderer, id, 4, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_translate(renderer, -100, 0);
+        rr_renderer_rotate(renderer, turning_value);
+        rr_renderer_translate(renderer, -60, 0);
+        render_sprite(renderer, id, 2, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        render_sprite(renderer, id, 0, flags);
+        rr_renderer_context_state_init(renderer, &state);
+        rr_renderer_translate(renderer, 120, 0);
+        render_sprite(renderer, id, 1, flags);
+        rr_renderer_context_state_free(renderer, &state);
+        break;
     }
 
     rr_renderer_context_state_free(renderer, &original_state);
@@ -566,7 +640,32 @@ void rr_renderer_mob_cache_init()
                                  rr_lanternfly_leg_draw, 0);
 
     rr_renderer_spritesheet_init(&mob_sprites[20], NULL,
-                                 400, 400, rr_sandstone_outer_draw,
-                                 280, 280, rr_sandstone_middle_draw,
-                                 160, 160, rr_sandstone_inner_draw, 0);
+                                  400, 400, rr_sandstone_outer_draw,
+                                  280, 280, rr_sandstone_middle_draw,
+                                  160, 160, rr_sandstone_inner_draw, 0);
+
+    rr_renderer_spritesheet_init(&mob_sprites[21], NULL, 192, 192, rr_kelp_draw, 0);
+
+    rr_renderer_spritesheet_init(
+        &mob_sprites[22], NULL, 336, 192, rr_king_mackarel_body_draw,
+        240, 240, rr_king_mackarel_fin1_draw,
+        240, 240, rr_king_mackarel_fin2_draw,
+        336, 192, rr_king_mackarel_head_draw,
+        336, 192, rr_king_mackarel_tail_draw, 0);
+
+    rr_renderer_spritesheet_init(
+        &mob_sprites[23], NULL, 336, 192, rr_seagull_body_draw,
+        240, 240, rr_seagull_wing1_draw,
+        240, 240, rr_seagull_wing2_draw, 0);
+
+    rr_renderer_spritesheet_init(
+        &mob_sprites[24], NULL, 240, 240, rr_sea_snail_body_draw,
+        192, 192, rr_sea_snail_head_draw, 0);
+
+    rr_renderer_spritesheet_init(
+        &mob_sprites[25], NULL, 336, 192, rr_pectinodon_body_draw,
+        240, 144, rr_pectinodon_head_draw,
+        336, 192, rr_pectinodon_tail_draw,
+        240, 144, rr_pectinodon_wing1_draw,
+        240, 144, rr_pectinodon_wing2_draw, 0);
 }

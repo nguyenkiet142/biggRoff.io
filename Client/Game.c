@@ -490,15 +490,12 @@ void rr_game_init(struct rr_game *this)
                                 NULL
                             ),
                             rr_ui_set_justify(
-                                rr_ui_h_container_init(rr_ui_container_init(), 0, 10, 
+                                rr_ui_h_container_init(rr_ui_container_init(), 0, 10,
+                                rr_ui_create_squad_biome_button_init("Hell Creek", 0xff8B4513, rr_biome_id_hell_creek),
+                                rr_ui_create_squad_biome_button_init("Garden", 0xff228B22, rr_biome_id_garden),
+                                rr_ui_create_squad_biome_button_init("Ocean", 0xff0077be, rr_biome_id_ocean),
                                 rr_ui_create_squad_button_init(),
                                 rr_ui_squad_button_init(),
-                                NULL
-                            ), 1, -1),
-                            rr_ui_set_justify(
-                                rr_ui_h_container_init(rr_ui_container_init(), 0, 10,
-                                rr_ui_create_squad_biome_button_init("H", 0xff8B4513, 0),
-                                rr_ui_create_squad_biome_button_init("G", 0xff228B22, 1),
                                 NULL
                             ), 1, -1),
                             NULL
@@ -1700,9 +1697,11 @@ void rr_game_tick(struct rr_game *this, float delta)
                 rr_renderer_translate(this->renderer, newLeftX + GRID_SIZE / 2,
                                       currY + GRID_SIZE / 2);
                 rr_renderer_scale(this->renderer, (GRID_SIZE + 2) / 256);
-                if (this->selected_biome == 0)
+                if (this->selected_biome == rr_biome_id_hell_creek)
                     rr_renderer_draw_tile_hell_creek(this->renderer,
                                                      tile_index);
+                else if (this->selected_biome == rr_biome_id_ocean)
+                    rr_renderer_draw_tile_ocean(this->renderer, tile_index);
                 else
                     rr_renderer_draw_tile_garden(this->renderer, tile_index);
                 rr_renderer_context_state_free(this->renderer, &state);

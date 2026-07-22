@@ -112,8 +112,6 @@ void system_interpolation_for_each_function(EntityIdx entity, void *_captures)
     {
         struct rr_component_player_info *player_info =
             rr_simulation_get_player_info(this, entity);
-        if (player_info->camera_fov != player_info->camera_fov_last_tick)
-            player_info->fov_adjustment = 1;
         player_info->camera_fov_last_tick = player_info->camera_fov;
         float fov = rr_lerp(RR_BASE_FOV, player_info->camera_fov,
                             player_info->fov_adjustment);

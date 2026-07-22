@@ -125,8 +125,12 @@ static void get_damage_reduction(struct rr_ui_element *this,
 static void get_fov_increase(struct rr_ui_element *this, struct rr_game *game)
 {
     calculate_diminish_factor
-    sprintf(extra, "%.0f%%",
-            (100 / (1 - 0.1 * rarity) - 100) * diminish_factor);
+    if (rarity <= 6)
+        sprintf(extra, "%.0f%%",
+                (100 / (1 - 0.1 * rarity) - 100) * diminish_factor);
+    else
+        sprintf(extra, "%.0f%%",
+                (233 + (rarity - 7) * 50) * diminish_factor);
 }
 
 static void get_range_increase(struct rr_ui_element *this, struct rr_game *game)

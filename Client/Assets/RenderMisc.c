@@ -26,6 +26,7 @@
 
 #define TILES_SIZE 3
 #define PROP_SIZE 2
+#define OCEAN_START (2 * TILES_SIZE + PROP_SIZE + 2)
 
 struct rr_renderer_spritesheet background_tiles;
 
@@ -128,6 +129,11 @@ void rr_renderer_draw_tile_garden(struct rr_renderer *renderer, uint8_t pos)
     render_sprite_from_cache(renderer, &background_tiles, TILES_SIZE + pos);
 }
 
+void rr_renderer_draw_tile_ocean(struct rr_renderer *renderer, uint8_t pos)
+{
+    render_sprite_from_cache(renderer, &background_tiles, OCEAN_START + pos);
+}
+
 void rr_renderer_draw_prop(struct rr_renderer *renderer, uint8_t pos)
 {
     render_sprite_from_cache(renderer, &background_tiles, 2 * TILES_SIZE + pos);
@@ -210,5 +216,7 @@ void rr_renderer_tiles_init()
         rr_ga_tile_1_draw, 256, 256, rr_ga_tile_2_draw, 256, 256,
         rr_ga_tile_3_draw, 800, 800, rr_prop_fern_draw, 800, 800,
         rr_prop_moss_draw, 250, 250, asset_web_draw, 700, 700, asset_nest_draw,
-        0);
+        256, 256, rr_oc_tile_1_draw, 256, 256, rr_oc_tile_2_draw, 256, 256,
+        rr_oc_tile_3_draw, 800, 800, rr_prop_palm_tree_draw, 800, 800,
+        rr_prop_beech_tree_draw, 0);
 }

@@ -62,6 +62,7 @@ set(SRCS
     ../Shared/Api.c
     ../Shared/Binary.c
     ../Shared/Bitset.c
+    ../Shared/BuildMaze.c
     # ../Shared/cJSON.c
     ../Shared/Crypto.c
     ../Shared/pb.c

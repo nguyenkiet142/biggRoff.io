@@ -195,13 +195,19 @@ struct rr_mob_data RR_MOB_DATA[rr_mob_id_max] = {
     {rr_mob_id_house_centipede,    rr_rarity_id_common, rr_rarity_id_max - 1,  25, 10, 23.0f, rr_rarity_id_common, rr_rarity_id_max,    rr_rarity_id_max,     {{rr_petal_id_peas,     0.1},{rr_petal_id_sand,      0.05}}},
     {rr_mob_id_lanternfly,         rr_rarity_id_common, rr_rarity_id_max - 1,  20, 10, 25.0f, rr_rarity_id_common, rr_rarity_id_max,    rr_rarity_id_max,     {{rr_petal_id_mint,     0.1},{rr_petal_id_sand,      0.05}}},
     {rr_mob_id_sandstone,          rr_rarity_id_common, rr_rarity_id_max - 1,  25, 15, 40.0f, rr_rarity_id_common, rr_rarity_id_max,    rr_rarity_id_max,     {{rr_petal_id_rock,    0.15},{rr_petal_id_sand,      0.10},{rr_petal_id_sawblade, 0.05}}},
+    {rr_mob_id_kelp,               rr_rarity_id_common, rr_rarity_id_max - 1,  10,  5, 24.0f, rr_rarity_id_max,    rr_rarity_id_max,    rr_rarity_id_max,     {{rr_petal_id_leaf,     0.1},{rr_petal_id_azalea,    0.25}}},
+    {rr_mob_id_king_mackarel,      rr_rarity_id_common, rr_rarity_id_max - 1,  35, 15, 28.0f, rr_rarity_id_common, rr_rarity_id_max,    rr_rarity_id_max,     {{rr_petal_id_shell,   0.05},{rr_petal_id_bubble,    0.10},{rr_petal_id_meat,     0.01}}},
+    {rr_mob_id_seagull,            rr_rarity_id_common, rr_rarity_id_max - 1,  20, 10, 22.0f, rr_rarity_id_common, rr_rarity_id_max,    rr_rarity_id_max,     {{rr_petal_id_feather,  0.1},{rr_petal_id_beak,      0.10},{rr_petal_id_nest,     0.01}}},
+    {rr_mob_id_sea_snail,          rr_rarity_id_common, rr_rarity_id_max - 1,  50,  8, 30.0f, rr_rarity_id_common, rr_rarity_id_max,    rr_rarity_id_max,     {{rr_petal_id_shell,    0.1},{rr_petal_id_bubble,    0.05}}},
+    {rr_mob_id_pectinodon,         rr_rarity_id_common, rr_rarity_id_max - 1,  30, 12, 25.0f, rr_rarity_id_common, rr_rarity_id_max,    rr_rarity_id_max,     {{rr_petal_id_fossil,   0.1},{rr_petal_id_berry,     0.10},{rr_petal_id_web,      0.05}}},
 };
 
 char const *RR_MOB_NAMES[rr_mob_id_max] = {
 "Triceratops","T-Rex","Fern","Tree","Pteranodon","Dakotaraptor",
 "Pachycephalosaurus","Ornithomimus","Ankylosaurus","Meteor",
 "Quetzalcoatlus","Edmontosaurus","Ant","Hornet","Dragonfly",
-"Honeybee","Beehive","Spider","House Centipede","Lanternfly","Sandstone"
+"Honeybee","Beehive","Spider","House Centipede","Lanternfly","Sandstone",
+"Kelp","King Mackarel","Seagull","Sea Snail","Pectinodon"
 };
 
 uint32_t RR_MOB_DIFFICULTY_COEFFICIENTS[rr_mob_id_max] = {
@@ -217,6 +223,11 @@ uint32_t RR_MOB_DIFFICULTY_COEFFICIENTS[rr_mob_id_max] = {
     1, //meteor
     5, //quetz
     3, //edmo
+    1, //kelp
+    3, //king mackarel
+    2, //seagull
+    1, //sea snail
+    3, //pectinodon
 };
 
 double RR_HELL_CREEK_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max] = {
@@ -233,7 +244,8 @@ double RR_HELL_CREEK_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max] = {
     75,   //quetz
     25,   //edmo
 };
-double RR_GARDEN_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 10, 5};
+double RR_GARDEN_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 1, 2, 1, 2, 0, 0, 0, 0, 0, 0};
+double RR_OCEAN_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 1, 2};
 
 struct rr_petal_rarity_scale RR_PETAL_RARITY_SCALE[rr_rarity_id_max] = {
     {1,    240, 45 },
@@ -321,6 +333,8 @@ static void init_game_coefficients()
             RR_HELL_CREEK_MOB_ID_RARITY_COEFFICIENTS[mob - 1];
         RR_GARDEN_MOB_ID_RARITY_COEFFICIENTS[mob] +=
             RR_GARDEN_MOB_ID_RARITY_COEFFICIENTS[mob - 1];
+        RR_OCEAN_MOB_ID_RARITY_COEFFICIENTS[mob] +=
+            RR_OCEAN_MOB_ID_RARITY_COEFFICIENTS[mob - 1];
     }
     for (uint64_t mob = 0; mob < rr_mob_id_max; ++mob)
     {
@@ -329,6 +343,10 @@ static void init_game_coefficients()
         RR_GARDEN_MOB_ID_RARITY_COEFFICIENTS[mob] /=
             RR_GARDEN_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max - 1];
     }
+    if (RR_OCEAN_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max - 1] > 0)
+        for (uint64_t mob = 0; mob < rr_mob_id_max; ++mob)
+            RR_OCEAN_MOB_ID_RARITY_COEFFICIENTS[mob] /=
+                RR_OCEAN_MOB_ID_RARITY_COEFFICIENTS[rr_mob_id_max - 1];
 }
 
 #define offset(a, b)                                                           \
@@ -507,7 +525,12 @@ void rr_static_data_init()
         RR_CRAFT_CHANCES[r] = get_prd_base(RR_BASE_CRAFT_CHANCES[r]);
     init_game_coefficients();
     init(HELL_CREEK);
+    init(GARDEN);
     init(BURROW);
+
+    build_custom_maze(rr_biome_id_hell_creek, &RR_MAZE_HELL_CREEK[0][0], 80);
+    build_custom_maze(rr_biome_id_garden, &RR_MAZE_GARDEN[0][0], 80);
+
 #ifdef RR_SERVER
     print_chances(1);  // c
     print_chances(4);  // C
@@ -613,6 +636,48 @@ RR_DEFINE_MAZE(HELL_CREEK, 80) = {
 {_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}, // 39
 };
 // clang-format on
+RR_DEFINE_MAZE(GARDEN, 80) = {
+    {_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}, // 0
+    {_,_,_,_,_,_,_,_,_,_,_,_,_,_,c,c,c,c,c,c,c,c,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}, // 1
+    {_,_,_,c,c,_,_,_,_,_,_,_,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,_,_,_,_,_,_,_,_,_,_,_,_}, // 2
+    {_,_,c,c,c,c,_,_,_,_,_,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,_,_,_,_,_,_,_,_,_,_}, // 3
+    {_,_,c,c,c,c,_,_,_,c,c,c,c,c,_,_,_,_,_,_,_,_,_,c,_,c,c,c,c,c,c,c,_,_,_,_,_,_,_,_}, // 4
+    {_,_,c,c,c,_,_,_,c,c,c,c,c,_,_,_,_,_,_,_,_,_,_,_,_,_,_,c,c,c,c,c,c,_,_,_,_,_,_,_}, // 5
+    {_,_,c,c,c,_,_,_,c,c,c,c,_,_,_,c,c,c,c,c,c,c,c,c,c,_,_,_,_,c,c,c,c,c,_,_,_,_,_,_}, // 6
+    {_,_,_,c,c,_,_,c,c,c,c,_,_,_,c,c,c,c,c,c,c,c,c,c,c,c,c,_,_,_,c,c,c,c,c,_,_,_,_,_}, // 7
+    {_,_,_,_,c,_,_,c,c,c,c,_,_,c,c,c,_,_,_,_,_,_,_,_,c,c,c,c,c,_,_,c,c,c,c,c,_,_,_,_}, // 8
+    {_,_,_,_,c,_,_,_,c,c,_,_,_,c,c,_,_,_,_,_,_,_,_,_,_,_,c,c,c,c,_,_,c,c,c,c,_,_,_,_}, // 9
+    {_,_,_,c,c,c,_,_,_,_,_,_,c,c,c,_,_,_,_,_,c,c,c,c,_,_,_,c,c,c,_,_,c,c,c,c,c,_,_,_}, // 10
+    {_,_,_,c,c,c,c,_,_,_,_,_,c,c,_,_,_,_,c,c,c,c,c,c,c,_,_,_,c,c,c,_,_,c,c,c,c,_,_,_}, // 11
+    {_,_,c,c,_,c,c,c,c,c,c,c,c,c,_,_,_,_,c,c,c,c,_,_,c,c,_,_,_,c,c,c,_,_,c,c,c,_,_,_}, // 12
+    {_,_,c,c,_,_,_,_,c,c,c,c,c,_,_,_,_,_,c,_,c,c,_,_,_,c,c,_,_,_,c,c,_,_,c,c,c,c,_,_}, // 13
+    {_,_,c,_,_,_,_,_,_,_,c,c,c,_,_,_,_,_,c,_,_,c,c,_,_,c,c,_,_,_,c,c,_,_,_,c,c,c,_,_}, // 14
+    {_,_,c,_,_,_,_,_,_,c,c,c,_,_,_,_,c,c,c,c,_,_,c,c,c,c,c,_,_,_,c,c,_,_,_,c,c,c,_,_}, // 15
+    {_,_,c,c,_,_,c,c,c,c,c,_,_,_,c,c,c,c,c,c,_,_,_,c,c,c,_,_,_,c,c,c,_,_,_,c,c,c,c,_}, // 16
+    {_,_,c,c,c,c,c,c,c,_,_,_,_,_,c,c,c,_,c,c,c,_,_,_,_,_,_,_,_,c,c,c,_,_,_,c,c,c,c,_}, // 17
+    {_,_,_,c,c,c,_,_,_,_,_,_,_,c,c,c,_,_,_,c,c,c,_,_,_,_,_,_,c,c,c,c,_,_,_,c,c,c,c,_}, // 18
+    {_,c,_,_,_,_,_,_,_,_,_,_,_,c,c,c,_,_,_,_,c,c,c,_,_,_,_,c,c,c,c,_,_,_,_,c,c,c,c,_}, // 19
+    {_,c,c,_,_,_,_,_,_,_,_,_,c,c,c,_,_,c,c,_,_,c,c,c,_,_,c,c,c,c,_,_,_,_,c,c,c,c,c,_}, // 20
+    {_,c,c,c,_,_,_,_,_,_,_,c,c,c,c,_,c,c,c,c,_,_,c,c,c,c,c,c,_,_,_,_,_,_,c,c,c,c,c,_}, // 21
+    {_,_,c,c,c,c,c,c,c,c,c,c,c,c,_,_,c,_,_,c,c,_,_,c,c,c,c,_,_,_,_,_,_,_,c,c,c,c,_,_}, // 22
+    {_,_,_,_,c,c,c,c,c,c,c,c,c,_,_,_,c,_,c,c,c,_,_,_,_,c,c,_,_,_,_,_,_,c,c,c,c,c,_,_}, // 23
+    {_,_,_,c,c,_,_,c,c,_,_,_,_,_,c,c,c,c,c,c,_,_,_,_,c,c,c,_,_,_,_,_,c,c,c,c,c,c,_,_}, // 24
+    {_,_,c,c,_,_,c,c,c,_,_,_,_,_,c,c,c,c,c,_,_,_,_,_,c,c,_,_,_,_,_,c,c,c,c,c,c,c,_,_}, // 25
+    {_,c,c,_,_,c,c,c,_,_,_,_,c,c,c,_,_,_,_,_,_,_,_,c,c,_,_,c,c,c,c,c,c,c,c,c,c,_,_,_}, // 26
+    {_,c,c,_,c,c,c,_,_,_,_,c,c,c,_,_,_,_,_,_,_,c,c,c,c,_,c,c,c,c,c,c,_,_,_,c,c,_,_,_}, // 27
+    {_,c,_,_,c,c,_,_,_,_,c,c,c,_,_,_,c,c,_,_,c,c,c,c,_,_,c,c,c,c,c,_,_,_,_,c,c,_,_,_}, // 28
+    {_,_,_,c,c,_,_,_,_,_,c,c,c,_,_,c,c,c,c,_,c,c,c,_,_,_,_,_,c,c,_,_,_,_,_,c,c,_,_,_}, // 29
+    {_,_,c,c,c,c,_,_,_,_,_,c,c,_,_,c,c,c,c,c,c,c,_,_,_,_,_,_,c,_,_,_,_,_,c,c,_,_,_,_}, // 30
+    {_,c,c,_,c,c,c,c,_,_,_,c,_,_,_,_,c,c,c,c,c,_,_,_,_,_,_,c,c,_,_,_,_,c,c,_,_,_,_,_}, // 31
+    {_,c,c,_,_,_,_,c,c,c,c,c,c,c,_,_,_,_,_,_,c,c,_,_,_,_,_,c,c,_,_,_,c,c,c,_,_,_,_,_}, // 32
+    {_,_,c,c,_,_,_,_,_,_,c,_,c,c,c,_,_,_,_,_,c,c,c,_,_,c,c,c,c,c,c,c,c,c,_,_,_,_,_,_}, // 33
+    {_,_,c,c,c,c,c,c,_,_,_,_,_,_,c,c,_,_,_,_,_,c,c,c,c,c,c,c,c,c,c,c,c,_,_,_,_,_,_,_}, // 34
+    {_,_,_,_,c,c,c,c,c,c,c,c,c,_,_,c,c,c,_,_,_,_,_,_,_,c,c,c,c,c,c,c,_,_,_,_,_,_,_,_}, // 35
+    {_,_,_,_,_,_,_,_,_,c,c,c,c,c,_,_,c,c,c,c,c,_,_,c,c,c,c,c,c,c,_,_,_,_,_,_,_,_,_,_}, // 36
+    {_,_,_,_,_,_,_,_,_,_,c,c,c,c,c,_,_,c,c,c,c,c,c,c,c,c,c,c,_,_,_,_,_,_,_,_,_,_,_,_}, // 37
+    {_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}, // 38
+    {_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_} // 39
+};
 RR_DEFINE_MAZE(BURROW, 4) = {{1, 1}, {0, 1}};
 
 #define MAZE_ENTRY(MAZE, GRID_SIZE)                                            \
@@ -631,8 +696,11 @@ struct rr_maze_declaration RR_MAZES[rr_biome_id_max] = {
         {1,  37, 2, 2, 1,  38, 100}, // 7
         {4,  24, 2, 2, 5,  25, 100}, // 8
     }},
-    {MAZE_ENTRY(HELL_CREEK, 1024), 0},
+    {MAZE_ENTRY(GARDEN, 1024), 1, {
+        {3, 4, 1, 1, 3, 4, 1}  // #0
+    }},
     {MAZE_ENTRY(BURROW, 512), 0},
+    {MAZE_ENTRY(HELL_CREEK, 1024), 0},
 };
 
 uint8_t RR_GLOBAL_BIOME = rr_biome_id_hell_creek;

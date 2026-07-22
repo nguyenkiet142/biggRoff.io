@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <stdint.h>
+
+struct rr_maze_grid;
 struct rr_renderer;
 
 void rr_triceratops_head_draw(struct rr_renderer *);
@@ -109,6 +112,23 @@ void rr_sandstone_outer_draw(struct rr_renderer *);
 void rr_sandstone_middle_draw(struct rr_renderer *);
 void rr_sandstone_inner_draw(struct rr_renderer *);
 
+void rr_kelp_draw(struct rr_renderer *);
+void rr_king_mackarel_body_draw(struct rr_renderer *);
+void rr_king_mackarel_fin1_draw(struct rr_renderer *);
+void rr_king_mackarel_fin2_draw(struct rr_renderer *);
+void rr_king_mackarel_head_draw(struct rr_renderer *);
+void rr_king_mackarel_tail_draw(struct rr_renderer *);
+void rr_seagull_wing1_draw(struct rr_renderer *);
+void rr_seagull_wing2_draw(struct rr_renderer *);
+void rr_seagull_body_draw(struct rr_renderer *);
+void rr_sea_snail_body_draw(struct rr_renderer *);
+void rr_sea_snail_head_draw(struct rr_renderer *);
+void rr_pectinodon_body_draw(struct rr_renderer *);
+void rr_pectinodon_head_draw(struct rr_renderer *);
+void rr_pectinodon_tail_draw(struct rr_renderer *);
+void rr_pectinodon_wing1_draw(struct rr_renderer *);
+void rr_pectinodon_wing2_draw(struct rr_renderer *);
+
 void rr_hc_tile_1_draw(struct rr_renderer *);
 void rr_hc_tile_2_draw(struct rr_renderer *);
 void rr_hc_tile_3_draw(struct rr_renderer *);
@@ -124,3 +144,47 @@ void rr_oc_tile_3_draw(struct rr_renderer *);
 void rr_prop_fern_draw(struct rr_renderer *);
 void rr_prop_moss_draw(struct rr_renderer *);
 void rr_prop_water_lettuce_draw(struct rr_renderer *);
+void rr_prop_palm_tree_draw(struct rr_renderer *);
+void rr_prop_beech_tree_draw(struct rr_renderer *);
+
+// CustomWall.c prototypes
+void render_custom_map(struct rr_renderer *r, uint8_t biome,
+                       struct rr_maze_grid *grid, uint32_t maze_dim,
+                       float grid_size, double leftX, double topY,
+                       double rightX, double bottomY);
+int  cw_biome_uses_custom(uint8_t biome);
+void cw_hc_draw(int variant, struct rr_renderer *r);
+void cw_ga_draw(int variant, struct rr_renderer *r);
+void cw_oc_draw(int variant, struct rr_renderer *r);
+
+// Hell Creek wall art (HellCreekWall.c)
+void rr_draw_hc_wall_center(struct rr_renderer *);
+void rr_draw_hc_wall_top(struct rr_renderer *);
+void rr_draw_hc_wall_bottom(struct rr_renderer *);
+void rr_draw_hc_wall_left(struct rr_renderer *);
+void rr_draw_hc_wall_right(struct rr_renderer *);
+void rr_draw_hc_wall_top_left(struct rr_renderer *);
+void rr_draw_hc_wall_top_right(struct rr_renderer *);
+void rr_draw_hc_wall_bottom_left(struct rr_renderer *);
+void rr_draw_hc_wall_bottom_right(struct rr_renderer *);
+void rr_draw_hc_wall_top_left_inner(struct rr_renderer *);
+void rr_draw_hc_wall_top_right_inner(struct rr_renderer *);
+void rr_draw_hc_wall_bottom_left_inner(struct rr_renderer *);
+void rr_draw_hc_wall_bottom_right_inner(struct rr_renderer *);
+void rr_draw_hc_wall_isolated(struct rr_renderer *);
+
+// Garden wall art (GardenWall.c)
+void rr_draw_ga_wall_center(struct rr_renderer *);
+void rr_draw_ga_wall_top(struct rr_renderer *);
+void rr_draw_ga_wall_bottom(struct rr_renderer *);
+void rr_draw_ga_wall_left(struct rr_renderer *);
+void rr_draw_ga_wall_right(struct rr_renderer *);
+void rr_draw_ga_wall_top_left(struct rr_renderer *);
+void rr_draw_ga_wall_top_right(struct rr_renderer *);
+void rr_draw_ga_wall_bottom_left(struct rr_renderer *);
+void rr_draw_ga_wall_bottom_right(struct rr_renderer *);
+void rr_draw_ga_wall_top_left_inner(struct rr_renderer *);
+void rr_draw_ga_wall_top_right_inner(struct rr_renderer *);
+void rr_draw_ga_wall_bottom_left_inner(struct rr_renderer *);
+void rr_draw_ga_wall_bottom_right_inner(struct rr_renderer *);
+void rr_draw_ga_wall_isolated(struct rr_renderer *);
